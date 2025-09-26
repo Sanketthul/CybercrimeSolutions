@@ -1,0 +1,65 @@
+#Cbot {
+  margin: 6rem auto;
+  max-height: calc(100vh - 4rem);
+  width: 100%;
+  max-width: 95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.Chat {
+  color: #ffffff;
+  margin: 1rem;
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  margin-top: -3rem;
+}
+.Chat {
+  display: inline-block;
+  text-decoration: none;
+  border: 2px solid #ffffff;
+  padding: 12px 34px;
+  background-color: #5ce1e6;
+  border-radius: 0.5rem;
+  position: relative;
+  cursor: auto;
+}
+.Bot {
+  font-weight: 600;
+  font-size: 16px;
+  max-width: 75rem;
+  font-family: poppins;
+}
+.Bot1 img {
+  width: 70px;
+  height: 60px;
+  margin-top: 4rem;
+}
+.Bot1 p {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  font-family: poppins;
+}
+@media (max-width: 480px) {
+  .Chat {
+    width: 25%;
+    height: 5vh;
+    font-size: 22px;
+    padding-bottom: 0.5rem;
+  }
+  .Bot {
+    font-size: 9px;
+    font-weight: 200;
+    font-family: poppins;
+  }
+  .Bot1 img {
+    width: 25px;
+    height: 4vh;
+  }
+  .Bot1 p {
+    font-size: 9px;
+  }
+}

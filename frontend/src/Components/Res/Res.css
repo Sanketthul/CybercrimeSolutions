@@ -1,0 +1,98 @@
+#Res {
+  overflow: hidden;
+  background-color: #d9feff;
+  width: 98.8vw;
+  height: 110vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 0rem auto;
+}
+.RES1 {
+  color: #5ce1e6;
+  font-size: 3rem;
+  font-weight: 600;
+  padding-top: 3rem;
+  margin-bottom: 2rem;
+}
+.RES1 {
+  display: inline-block;
+  text-decoration: none;
+  border: 2px solid #5ce1e6;
+  padding: 12px 34px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 0.5rem;
+  position: relative;
+  cursor: auto;
+}
+.RP {
+  font-weight: 700;
+  font-size: 16px;
+  max-width: 75rem;
+  padding: 0 2rem;
+  font-family: poppins;
+}
+.RPBars {
+  margin: 1.5rem;
+  width: 100vw;
+  max-width: 80%;
+  text-align: left;
+}
+.RRBar {
+  display: flex;
+  margin: 1rem;
+  padding: 1.5rem 2rem;
+  border-radius: 0.5rem;
+  background: rgb(255, 255, 255);
+}
+.RPBarImg {
+  object-fit: cover;
+  height: 4rem;
+  width: 4rem;
+  margin-right: 2rem;
+}
+.BarText h2 {
+  color: black;
+}
+.BarText p {
+  color: black;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: poppins;
+}
+.RRBar:hover {
+  box-shadow: 0 0 20px 0px rgba(104, 247, 255, 0.823);
+  transition: 1s;
+}
+@media (max-width: 780px) {
+  #Res {
+    height: 160vh;
+  }
+}
+@media (max-width: 470px) {
+  #Res {
+    height: 130vh;
+  }
+  .RES1 {
+    width: 25%;
+    font-size: 20px;
+    padding-left: 1.2rem;
+  }
+  .RP {
+    font-size: 9px;
+    font-weight: 200;
+    font-family: poppins;
+  }
+  .RPBarImg {
+    width: 2rem;
+    height: 2rem;
+  }
+  .BarText h2 {
+    font-size: 12px;
+  }
+  .BarText p {
+    font-size: 9px;
+  }
+}

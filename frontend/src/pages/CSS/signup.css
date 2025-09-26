@@ -1,0 +1,15 @@
+div.div1{
+    display: flex;
+    margin-left: 2rem;
+    margin-bottom: -1rem;
+}
+@media (max-width:480px) {
+    div.div1{
+        font-size: 10px;
+    }
+    input{
+        width: 10%;
+        height: 1.3vh;
+    }
+    
+}

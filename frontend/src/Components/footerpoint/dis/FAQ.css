@@ -1,0 +1,64 @@
+.my_div{
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+.Mydiv {
+    width: 60%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    border: 0.5px solid black;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+}
+.Mydiv h1{
+    width: 20%;
+    margin: 0 auto;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 40px;
+    margin-top: 5rem;
+    box-sizing: border-box;
+    border: 1px solid #5ce1e6;
+    border-radius: 0.5rem;
+    background: #5ce1e6;
+    color: white;
+    margin-bottom: 1rem;
+}
+.Mydiv p1{
+    font-size: 18px;
+    font-family: poppins;
+}
+.Mydiv h2{
+    width: 70%;
+    margin: 0 auto;
+    color: #5ce1e6;
+    text-align: left;
+    margin-top: 2rem;
+}
+.Mydiv p{
+    width: 70%;
+    margin: 0 auto;
+    color: gray;
+    text-align: left;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+    font-family: poppins;
+}
+@media (max-width:740px){
+    .Mydiv h1{
+        font-size: 20px;
+        width: 60%;
+    }
+    .Mydiv h2{
+        font-size: 12px;
+    }
+    .Mydiv p1{
+        font-size: 11px;
+    }
+    .Mydiv p{
+        font-size: 9px;
+    }
+}

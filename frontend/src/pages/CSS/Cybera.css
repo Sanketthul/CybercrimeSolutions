@@ -1,0 +1,48 @@
+.ptag {
+    width: 100%;
+    margin: 0 auto;
+}
+.ptag h2{
+    width: 70%;
+    margin: 0 auto;
+    margin-top: 4rem;
+    margin-bottom: 1rem;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: poppins;
+}
+.ptag h3{
+    width: 70%;
+    margin: 0 auto;
+    margin-top: 0.5rem;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: poppins
+}
+.heading h4{
+    margin-top: 3rem;
+    box-sizing: border-box;
+    border: 1px solid #5ce1e6;
+    background: #5ce1e6;
+    border-radius: 0.5rem;
+    color: #ffffff;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 25px;
+}
+.heading h5{
+    margin-top: 3rem;
+    box-sizing: border-box;
+    border: 1px solid #5ce1e6;
+    background: #5ce1e6;
+    border-radius: 0.5rem;
+    color: #ffffff;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 25px;
+}
+.heading p{
+    width: 70%;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+}
