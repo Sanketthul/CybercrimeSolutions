@@ -1,0 +1,72 @@
+
+.heading{
+    width: 90%;
+    margin: 0 auto;
+}
+.heading h2{
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    justify-content: center;
+    align-items: center;
+    color: rgb(255, 255, 255);
+    background: #5ce1e6;
+    border-radius: 0.5rem;
+    font-size: 40px;
+    font-family: poppins;
+    font-weight:600 ;
+    margin-top: 3rem;
+    margin-left: 0.9rem;
+    box-sizing: border-box;
+    border: 1px solid #5ce1e6;
+}
+.heading p{
+    font-family: poppins;
+    font-size: 15px;
+    margin-top: 2rem;
+    margin-bottom: 0.6rem;
+}
+.heading p1{
+    font-family: poppins;
+    font-size: 15px;
+}
+.table{
+    width: 85rem;
+    height: 842px;
+    margin: 0 auto;
+    margin-top: 2rem;
+    border: 3px solid #5ce1e6;
+    text-align: center;
+}
+.table th{
+    border: 1px solid #5ce1e6;
+    font-size: 22px;
+    padding: 30px 30px;
+    color: black;
+    font-family: poppins;
+    font-weight: 700;
+}
+.table td{
+    border: 1px solid #5ce1e6;
+    text-align: left;
+    font-family: poppins;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: 0.3rem;
+}
+@media (max-width:740px){
+    .heading h2{
+        font-size: 23px;
+    }
+    .table {
+        width: 70%;
+        height: 181vh;
+    }
+    .table th{
+        font-size: 15px;
+    }
+    .table td{
+        font-size: 12px;
+    }
+}
+

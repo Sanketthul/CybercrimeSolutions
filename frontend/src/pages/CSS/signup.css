@@ -1,0 +1,129 @@
+@import url("./login.css");
+.auth-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.auth-name-row label {
+  min-width: 0;
+}
+@media (max-width: 420px) {
+  .auth-name-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.signup-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: #f4f6fb;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(3, 1, 100, 0.1);
+}
+
+.signup-card h1 {
+  margin: 0 0 8px;
+  color: #030164;
+  text-align: center;
+}
+
+.signup-subtitle {
+  margin-bottom: 24px;
+  color: #666;
+  text-align: center;
+}
+
+.signup-card label {
+  display: block;
+  margin: 16px 0 7px;
+  color: #242424;
+  font-weight: 600;
+}
+
+.signup-card input,
+.signup-card select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d5d9e4;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+}
+
+.signup-card input:focus,
+.signup-card select:focus {
+  outline: 2px solid #2d7495;
+  outline-offset: 1px;
+  border-color: #2d7495;
+}
+
+.admin-code-field {
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px solid #d5d9e4;
+  border-radius: 10px;
+  background: #f8f9ff;
+}
+
+.admin-code-field small {
+  display: block;
+  margin-top: 8px;
+  color: #666;
+}
+
+.signup-card button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #030164;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-card button:hover {
+  background: #363199;
+}
+
+.signup-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.signup-alert {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.signup-error {
+  background: #fff0f0;
+  color: #a32121;
+}
+
+.signup-success {
+  background: #edf9f0;
+  color: #176b32;
+}
+
+@media (max-width: 480px) {
+  .signup-card {
+    padding: 22px;
+  }
+}
