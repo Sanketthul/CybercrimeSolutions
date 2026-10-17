@@ -187,6 +187,7 @@ function requireAdmin(req, res, next) {
       error: "Administrator access required.",
     });
   }
+
   next();
 }
 
@@ -226,7 +227,7 @@ app.post("/api/feedbacks", async (req, res) => {
   } catch (error) {
     console.error("Feedback submission failed:", error.message);
     res.status(500).json({
-      error: "Unable to submit feedback right now.",
+      error: "Unable to submit feedback.",
     });
   }
 });
@@ -297,7 +298,6 @@ app.post(
   async (req, res) => {
     try {
       const trackingId = clean(req.body.trackingId, 30).toUpperCase();
-
       const email = clean(req.body.email, 254).toLowerCase();
 
       if (!trackingId || !emailIsValid(email)) {
@@ -803,6 +803,395 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     error: "Unexpected server error.",
   });
+});
+
+/* INTELLIGENCE DASHBOARD API */
+
+// Cache external threat data for 10 minutes.
+let threatCache = {
+  data: null,
+  fetchedAt: 0,
+};
+
+const THREAT_CACHE_TTL = 10 * 60 * 1000;
+
+app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const now = Date.now();
+
+    // Load actual reports from the existing MongoDB collection.
+    const [
+      totalReports,
+      statusCounts,
+      categoryCounts,
+      monthlyCounts,
+      recentReports,
+    ] = await Promise.all([
+      OtherCrime.countDocuments(),
+
+      OtherCrime.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+
+      OtherCrime.aggregate([
+        {
+          $group: {
+            _id: { $ifNull: ["$category", "Other cybercrime"] },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 8 },
+      ]),
+
+      OtherCrime.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: new Date(
+                new Date().getFullYear(),
+                new Date().getMonth() - 5,
+                1,
+              ),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+      ]),
+
+      OtherCrime.find()
+        .select("trackingId category status createdAt")
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .lean(),
+    ]);
+
+    const statusMap = Object.fromEntries(
+      statusCounts.map((item) => [item._id || "Submitted", item.count]),
+    );
+
+    let threatData = threatCache.data;
+    let threatFeedStatus = "cached";
+
+    // URLhaus community feed. Never expose provider credentials to React.
+    if (!threatData || now - threatCache.fetchedAt > THREAT_CACHE_TTL) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+
+        try {
+          const response = await fetch(
+            "https://urlhaus-api.abuse.ch/v1/urls/recent/",
+            {
+              method: "GET",
+              signal: controller.signal,
+              headers: {
+                Accept: "application/json",
+                ...(process.env.URLHAUS_AUTH_KEY
+                  ? { "Auth-Key": process.env.URLHAUS_AUTH_KEY }
+                  : {}),
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`URLhaus returned HTTP ${response.status}`);
+          }
+
+          const payload = await response.json();
+
+          if (payload.query_status !== "ok" || !Array.isArray(payload.urls)) {
+            throw new Error("Unexpected URLhaus response");
+          }
+
+          threatData = payload.urls.slice(0, 50).map((item) => ({
+            id: item.id,
+            url: item.url,
+            host: item.host,
+            threat: item.threat,
+            dateAdded: item.date_added,
+            status: item.url_status,
+            tags: Array.isArray(item.tags) ? item.tags : [],
+          }));
+
+          threatCache = {
+            data: threatData,
+            fetchedAt: Date.now(),
+          };
+
+          threatFeedStatus = "live";
+        } finally {
+          clearTimeout(timeout);
+        }
+      } catch (feedError) {
+        console.error("URLhaus feed unavailable:", feedError.message);
+
+        // Keep the last successful snapshot if one exists.
+        threatData = threatCache.data || [];
+        threatFeedStatus = threatData.length ? "cached" : "unavailable";
+      }
+    }
+
+    const monthlyMap = new Map(
+      monthlyCounts.map((item) => [
+        `${item._id.year}-${String(item._id.month).padStart(2, "0")}`,
+        item.count,
+      ]),
+    );
+
+    const monthlyTrend = [];
+
+    for (let offset = 5; offset >= 0; offset--) {
+      const date = new Date();
+      date.setDate(1);
+      date.setMonth(date.getMonth() - offset);
+
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0",
+      )}`;
+
+      monthlyTrend.push({
+        month: date.toLocaleString("en-IN", {
+          month: "short",
+          year: "2-digit",
+        }),
+        count: monthlyMap.get(key) || 0,
+      });
+    }
+
+    res.set("Cache-Control", "private, no-store");
+
+    return res.json({
+      generatedAt: new Date().toISOString(),
+
+      reports: {
+        total: totalReports,
+        submitted: statusMap.Submitted || 0,
+        underReview: statusMap["Under Review"] || 0,
+        inProgress: statusMap["In Progress"] || 0,
+        resolved: statusMap.Resolved || 0,
+        closed: statusMap.Closed || 0,
+      },
+
+      categories: categoryCounts.map((item) => ({
+        name: item._id || "Other cybercrime",
+        count: item.count,
+      })),
+
+      monthlyTrend,
+      recentReports,
+
+      threats: {
+        provider: "URLhaus",
+        status: threatFeedStatus,
+        fetchedAt: threatCache.fetchedAt
+          ? new Date(threatCache.fetchedAt).toISOString()
+          : null,
+        total: threatData ? threatData.length : 0,
+        items: threatData || [],
+      },
+    });
+  } catch (error) {
+    console.error("Intelligence API error:", error.message);
+
+    return res.status(500).json({
+      error: "Unable to load intelligence data.",
+    });
+  }
+});
+
+/* PUBLIC URLHAUS THREAT AWARENESS API
+   Add after the existing /api/intelligence route. */
+
+app.get("/api/public/threat-awareness", async (req, res) => {
+  let items = threatCache.data;
+  let feedStatus = "cached";
+
+  try {
+    const now = Date.now();
+    const cacheExpired =
+      !items || now - threatCache.fetchedAt > THREAT_CACHE_TTL;
+
+    if (cacheExpired) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
+      try {
+        const response = await fetch(
+          "https://urlhaus-api.abuse.ch/v1/urls/recent/",
+          {
+            method: "GET",
+            signal: controller.signal,
+            headers: {
+              Accept: "application/json",
+              ...(process.env.URLHAUS_AUTH_KEY
+                ? {
+                    "Auth-Key": process.env.URLHAUS_AUTH_KEY,
+                  }
+                : {}),
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(`URLhaus returned HTTP ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        if (
+          payload.query_status !== "ok" &&
+          payload.query_status !== "no_results"
+        ) {
+          throw new Error("Unexpected URLhaus response");
+        }
+
+        const urls = Array.isArray(payload.urls) ? payload.urls : [];
+
+        items = urls.map((item) => ({
+          id: String(item.id || ""),
+          url: String(item.url || ""),
+          host: String(item.host || "Unknown host"),
+          threat: String(item.threat || "Malware-related URL"),
+          dateAdded: item.date_added || null,
+          status: item.url_status || "unknown",
+          tags: Array.isArray(item.tags)
+            ? item.tags.filter((tag) => typeof tag === "string")
+            : [],
+        }));
+        threatCache = {
+          data: items,
+          fetchedAt: Date.now(),
+        };
+
+        feedStatus = "live";
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    items = Array.isArray(items) ? items : [];
+
+    // These statistics describe only the displayed feed,
+    // not all cybercrime or all URLs worldwide.
+    const todayUTC = new Date().toISOString().slice(0, 10);
+
+    const stats = {
+      returned: items.length,
+
+      online: items.filter(
+        (item) => String(item.status || "").toLowerCase() === "online",
+      ).length,
+
+      offline: items.filter(
+        (item) => String(item.status || "").toLowerCase() === "offline",
+      ).length,
+
+      addedToday: items.filter((item) => {
+        const dateAdded = item.dateAdded || item.date_added || "";
+        return (
+          typeof dateAdded === "string" && dateAdded.slice(0, 10) === todayUTC
+        );
+      }).length,
+    };
+
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+
+    return res.json({
+      provider: "URLhaus",
+      status: feedStatus,
+      fetchedAt: threatCache.fetchedAt
+        ? new Date(threatCache.fetchedAt).toISOString()
+        : null,
+      stats,
+      items: items.map((item) => ({
+        id: item.id,
+        url: item.url || item.host || "",
+        host: item.host || "",
+        threat: item.threat || "Malware-related URL",
+        dateAdded: item.dateAdded || null,
+        status: item.status || "unknown",
+        tags: Array.isArray(item.tags) ? item.tags : [],
+        referenceUrl:
+          item.referenceUrl ||
+          (item.id
+            ? `https://urlhaus.abuse.ch/url/${encodeURIComponent(item.id)}/`
+            : "https://urlhaus.abuse.ch/"),
+      })),
+    });
+  } catch (error) {
+    console.error(
+      "Public URLhaus feed unavailable:",
+      error.name,
+      error.message,
+    );
+
+    // If an older successful cache exists, serve it.
+    items = Array.isArray(threatCache.data) ? threatCache.data : [];
+
+    if (items.length === 0) {
+      return res.status(503).json({
+        error: "Threat intelligence is temporarily unavailable.",
+        provider: "URLhaus",
+        status: "unavailable",
+      });
+    }
+
+    return res.json({
+      provider: "URLhaus",
+      status: "cached",
+      fetchedAt: threatCache.fetchedAt
+        ? new Date(threatCache.fetchedAt).toISOString()
+        : null,
+      stats: {
+        returned: items.length,
+
+        online: items.filter(
+          (item) => String(item.status || "").toLowerCase() === "online",
+        ).length,
+
+        offline: items.filter(
+          (item) => String(item.status || "").toLowerCase() === "offline",
+        ).length,
+
+        addedToday: items.filter((item) => {
+          const dateAdded = item.dateAdded || item.date_added || "";
+          return (
+            typeof dateAdded === "string" &&
+            dateAdded.slice(0, 10) === new Date().toISOString().slice(0, 10)
+          );
+        }).length,
+      },
+
+      items: items.map((item) => ({
+        id: item.id,
+        url: item.url || "",
+        host: item.host,
+        threat: item.threat,
+        dateAdded: item.dateAdded,
+        status: item.status,
+        tags: item.tags,
+        referenceUrl: item.id
+          ? `https://urlhaus.abuse.ch/url/${encodeURIComponent(item.id)}/`
+          : "https://urlhaus.abuse.ch/",
+      })),
+    });
+  }
 });
 
 // Connect to MongoDB and start the API.
