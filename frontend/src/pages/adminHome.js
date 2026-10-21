@@ -5,9 +5,10 @@ import "./CSS/admin.css";
 
 const STATUSES = [
   "Submitted",
-  "Under Review",
-  "In Progress",
-  "Resolved",
+  "Under review",
+  "Verified",
+  "Rejected",
+  "Guidance provided",
   "Closed",
 ];
 
@@ -19,6 +20,7 @@ export default function AdminHome({ userData }) {
   const [activeTab, setActiveTab] = useState("complaints");
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
+  const [responseNotes, setResponseNotes] = useState({});
 
   const navigate = useNavigate();
 
@@ -55,15 +57,14 @@ export default function AdminHome({ userData }) {
       total: complaints.length,
 
       pending: complaints.filter((item) =>
-        ["Submitted", "Under Review"].includes(item.status),
+        ["Submitted", "Under review", "Under Review"].includes(item.status),
       ).length,
 
-      progress: complaints.filter((item) => item.status === "In Progress")
-        .length,
-
-      resolved: complaints.filter((item) =>
-        ["Resolved", "Closed"].includes(item.status),
+      progress: complaints.filter((item) =>
+        ["Verified", "Guidance provided"].includes(item.status),
       ).length,
+
+      resolved: complaints.filter((item) => item.status === "Closed").length,
     }),
     [complaints],
   );
@@ -99,17 +100,24 @@ export default function AdminHome({ userData }) {
     setBusyId(id);
     setError("");
 
+    const note = (responseNotes[id] || "").trim();
+
     try {
       await api.patch(`/api/othercrime/${id}/status`, {
         status,
-        note: `Status updated to ${status}`,
+        note,
       });
+
+      setResponseNotes((current) => ({
+        ...current,
+        [id]: "",
+      }));
 
       await loadDashboard();
     } catch (requestError) {
       setError(
         requestError.response?.data?.error ||
-          "Could not update complaint status.",
+          "Could not update the report status.",
       );
     } finally {
       setBusyId("");
@@ -321,6 +329,7 @@ export default function AdminHome({ userData }) {
                     <th>Submitted</th>
                     <th>Status</th>
                     <th>Update status</th>
+                    <th>Admin response</th>
                   </tr>
                 </thead>
 
@@ -363,19 +372,49 @@ export default function AdminHome({ userData }) {
 
                       <td>
                         <select
-                          aria-label={`Update ${
-                            item.trackingId || "complaint"
-                          } status`}
+                          aria-label={`Update ${item.trackingId || "report"} status`}
                           disabled={busyId === item._id}
-                          value={item.status || "Submitted"}
-                          onChange={(e) =>
-                            updateStatus(item._id, e.target.value)
+                          value={
+                            STATUSES.includes(item.status)
+                              ? item.status
+                              : "Submitted"
                           }
+                          onChange={(event) => {
+                            updateStatus(item._id, event.target.value);
+                          }}
                         >
+                          {!STATUSES.includes(item.status) && (
+                            <option value="Submitted" disabled>
+                              Legacy: {item.status}
+                            </option>
+                          )}
+
                           {STATUSES.map((status) => (
-                            <option key={status}>{status}</option>
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
                           ))}
                         </select>
+                      </td>
+
+                      <td className="admin-response-cell">
+                        <textarea
+                          rows="3"
+                          maxLength="500"
+                          value={responseNotes[item._id] || ""}
+                          onChange={(event) =>
+                            setResponseNotes((current) => ({
+                              ...current,
+                              [item._id]: event.target.value,
+                            }))
+                          }
+                          placeholder="Explain the decision or provide next steps…"
+                          aria-label={`Admin response for ${item.trackingId || "report"}`}
+                        />
+
+                        <small>
+                          This response will be visible to the report submitter.
+                        </small>
                       </td>
                     </tr>
                   ))}

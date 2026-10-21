@@ -73,6 +73,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+
       return callback(new Error("Origin is not allowed by CORS"));
     },
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
@@ -84,21 +85,24 @@ app.use(express.json({ limit: "100kb" }));
 
 // Simple in-memory rate limiter.
 // Use a shared store if deploying multiple backend instances.
-const attempts = new Map();
 
 function rateLimit({ windowMs = 15 * 60 * 1000, max = 100 } = {}) {
+  // Each limiter gets its own counter map.
+  const attempts = new Map();
+
   return (req, res, next) => {
     const key = req.ip || req.socket.remoteAddress || "unknown";
     const now = Date.now();
-    const entry = attempts.get(key);
+    let entry = attempts.get(key);
 
     if (!entry || now - entry.start > windowMs) {
-      attempts.set(key, { start: now, count: 1 });
+      entry = { start: now, count: 1 };
+      attempts.set(key, entry);
     } else {
       entry.count += 1;
     }
 
-    if (attempts.get(key).count > max) {
+    if (entry.count > max) {
       return res.status(429).json({
         error: "Too many requests. Please try again later.",
       });
@@ -146,7 +150,10 @@ function matchesAdminSecret(submittedCode, configuredCode) {
   return crypto.timingSafeEqual(submittedHash, configuredHash);
 }
 
-// Authentication middleware.
+// ============================================================
+// AUTHENTICATION MIDDLEWARE
+// ============================================================
+
 async function authenticate(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
@@ -181,6 +188,39 @@ async function authenticate(req, res, next) {
   }
 }
 
+async function authenticateIfPresent(req, res, next) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+
+  // Preserve public report submission for guests.
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET, {
+      algorithms: ["HS256"],
+    });
+
+    const user = await User.findById(payload.sub).select(
+      "fname lname email userType",
+    );
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Account no longer exists. Please sign in again.",
+      });
+    }
+
+    req.user = user;
+    return next();
+  } catch (error) {
+    return res.status(401).json({
+      error: "Session expired or invalid. Please sign in again.",
+    });
+  }
+}
+
 function requireAdmin(req, res, next) {
   if (req.user?.userType !== "Admin") {
     return res.status(403).json({
@@ -191,13 +231,20 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Health check.
+// ============================================================
+// HEALTH CHECK
+// ============================================================
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
     database: mongoose.connection.readyState === 1 ? "connected" : "connecting",
   });
 });
+
+// ============================================================
+// FEEDBACK ROUTES
+// ============================================================
 
 // Submit feedback.
 app.post("/api/feedbacks", async (req, res) => {
@@ -226,6 +273,7 @@ app.post("/api/feedbacks", async (req, res) => {
     });
   } catch (error) {
     console.error("Feedback submission failed:", error.message);
+
     res.status(500).json({
       error: "Unable to submit feedback.",
     });
@@ -243,16 +291,25 @@ app.get("/api/feedbacks", authenticate, requireAdmin, async (req, res) => {
     res.json(feedbacks);
   } catch (error) {
     console.error("Feedback retrieval failed:", error.message);
+
     res.status(500).json({
       error: "Unable to load feedback.",
     });
   }
 });
 
+// ============================================================
+// CYBERCRIME REPORTING AND TRACKING
+// ============================================================
+
 // Submit a cybercrime report.
 app.post(
   "/api/othercrime",
-  rateLimit({ windowMs: 60 * 60 * 1000, max: 10 }),
+  rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+  }),
+  authenticateIfPresent,
   async (req, res) => {
     try {
       const name = clean(req.body.name, 100);
@@ -267,7 +324,8 @@ app.post(
         });
       }
 
-      const trackingId = `CCS-${crypto.randomBytes(8).toString("hex").toUpperCase()}`;
+      const trackingId =
+        "CCS-" + crypto.randomBytes(8).toString("hex").toUpperCase();
 
       const report = await OtherCrime.create({
         name,
@@ -275,29 +333,51 @@ app.post(
         message,
         category,
         trackingId,
+        userId: req.user?._id || null,
+        status: "Submitted",
+        statusHistory: [
+          {
+            status: "Submitted",
+            changedBy: "system",
+            note: "Your report has been received by Cybercrime Solutions.",
+          },
+        ],
       });
 
-      res.status(201).json({
+      return res.status(201).json({
         message: "Report submitted successfully.",
         trackingId: report.trackingId,
         status: report.status,
+        createdAt: report.createdAt,
       });
     } catch (error) {
       console.error("Complaint submission failed:", error.message);
-      res.status(500).json({
+
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          error:
+            "The report could not be saved because its fields do not match the report model.",
+        });
+      }
+
+      return res.status(500).json({
         error: "Unable to submit your report right now.",
       });
     }
   },
 );
 
-// Track a complaint by tracking ID and submitter email.
+// Track a complaint using its tracking ID and submitter email.
 app.post(
   "/api/othercrime/track",
-  rateLimit({ windowMs: 15 * 60 * 1000, max: 20 }),
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+  }),
   async (req, res) => {
     try {
       const trackingId = clean(req.body.trackingId, 30).toUpperCase();
+
       const email = clean(req.body.email, 254).toLowerCase();
 
       if (!trackingId || !emailIsValid(email)) {
@@ -310,7 +390,9 @@ app.post(
         trackingId,
         email,
       })
-        .select("trackingId category status createdAt updatedAt statusHistory")
+        .select(
+          "trackingId category status createdAt updatedAt statusHistory adminResponse",
+        )
         .lean();
 
       if (!report) {
@@ -319,8 +401,9 @@ app.post(
         });
       }
 
-      res.json({
+      return res.json({
         trackingId: report.trackingId,
+        adminResponse: report.adminResponse || "",
         category: report.category,
         status: report.status,
         createdAt: report.createdAt,
@@ -335,6 +418,7 @@ app.post(
       });
     } catch (error) {
       console.error("Complaint tracking failed:", error.message);
+
       res.status(500).json({
         error: "Unable to track this report right now.",
       });
@@ -343,6 +427,48 @@ app.post(
 );
 
 // Retrieve complaints (Admin only).
+
+/* Retrieve reports belonging to the logged-in user. */
+app.get("/api/my-reports", authenticate, async (req, res) => {
+  try {
+    const reports = await OtherCrime.find({
+      userId: req.user._id,
+    })
+      .select(
+        "trackingId category message status adminResponse createdAt updatedAt statusHistory",
+      )
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .lean();
+
+    return res.json(
+      reports.map((report) => ({
+        _id: report._id,
+        trackingId: report.trackingId,
+        category: report.category,
+        message: report.message,
+        status: report.status,
+        adminResponse: report.adminResponse || "",
+        createdAt: report.createdAt,
+        updatedAt: report.updatedAt,
+        statusHistory: (report.statusHistory || []).map(
+          ({ status, note, createdAt }) => ({
+            status,
+            note,
+            createdAt,
+          }),
+        ),
+      })),
+    );
+  } catch (error) {
+    console.error("My reports retrieval failed:", error.message);
+
+    return res.status(500).json({
+      error: "Unable to load your reports right now.",
+    });
+  }
+});
+
 app.get("/api/othercrime", authenticate, requireAdmin, async (req, res) => {
   try {
     const reports = await OtherCrime.find()
@@ -353,6 +479,7 @@ app.get("/api/othercrime", authenticate, requireAdmin, async (req, res) => {
     res.json(reports);
   } catch (error) {
     console.error("Complaint retrieval failed:", error.message);
+
     res.status(500).json({
       error: "Unable to load complaints.",
     });
@@ -367,9 +494,10 @@ app.patch(
   async (req, res) => {
     const allowedStatuses = [
       "Submitted",
-      "Under Review",
-      "In Progress",
-      "Resolved",
+      "Under review",
+      "Verified",
+      "Rejected",
+      "Guidance provided",
       "Closed",
     ];
 
@@ -388,29 +516,47 @@ app.patch(
     }
 
     try {
+      // FIX: Load the requested report before updating it.
       const report = await OtherCrime.findById(req.params.id);
 
       if (!report) {
         return res.status(404).json({
-          error: "Complaint not found.",
+          error: "Report not found.",
         });
       }
 
+      const note = clean(req.body.note, 500);
+      const responseNote = note || `Status changed to ${status}.`;
+
       report.status = status;
+      report.adminResponse = responseNote;
+
       report.statusHistory.push({
         status,
         changedBy: req.user.email,
-        note: clean(req.body.note, 500),
+        note: responseNote,
       });
 
       await report.save();
 
-      res.json({
-        message: "Complaint status updated.",
-        report,
+      return res.json({
+        message: "Report status updated successfully.",
+        report: {
+          trackingId: report.trackingId,
+          status: report.status,
+          adminResponse: report.adminResponse,
+          statusHistory: report.statusHistory,
+        },
       });
     } catch (error) {
       console.error("Complaint status update failed:", error.message);
+
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          error: "The selected status is not accepted by the report model.",
+        });
+      }
+
       res.status(500).json({
         error: "Unable to update complaint status.",
       });
@@ -418,10 +564,16 @@ app.patch(
   },
 );
 
-// Register a new User or Admin.
+// ============================================================
+// REGISTRATION
+// ============================================================
+
 app.post(
   "/register",
-  rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }),
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+  }),
   async (req, res) => {
     try {
       const {
@@ -522,10 +674,16 @@ app.post(
   },
 );
 
-// Login.
+// ============================================================
+// LOGIN
+// ============================================================
+
 app.post(
   "/login-user",
-  rateLimit({ windowMs: 15 * 60 * 1000, max: 15 }),
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 15,
+  }),
   async (req, res) => {
     try {
       const email = clean(req.body.email, 254).toLowerCase();
@@ -554,6 +712,7 @@ app.post(
       });
     } catch (error) {
       console.error("Login failed:", error.message);
+
       res.status(500).json({
         error: "Unable to sign in right now.",
       });
@@ -584,6 +743,7 @@ app.get("/getAllUser", authenticate, requireAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error("User list failed:", error.message);
+
     res.status(500).json({
       error: "Unable to load users.",
     });
@@ -619,6 +779,7 @@ app.delete("/users/:id", authenticate, requireAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error("User deletion failed:", error.message);
+
     res.status(500).json({
       error: "Unable to delete user.",
     });
@@ -630,9 +791,13 @@ app.delete("/users/:id", authenticate, requireAdmin, async (req, res) => {
 // POST /api/chat
 // Keep GEMINI_API_KEY on the backend, never in React.
 // ============================================================
+
 app.post(
   "/api/chat",
-  rateLimit({ windowMs: 60 * 1000, max: 10 }),
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+  }),
   async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
     const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
@@ -790,6 +955,10 @@ Your responsibilities:
   },
 );
 
+// ============================================================
+// INTELLIGENCE DASHBOARD AND URLHAUS CACHE
+// ============================================================
+
 // Handle CORS and other unexpected errors.
 app.use((err, req, res, next) => {
   if (err.message === "Origin is not allowed by CORS") {
@@ -805,8 +974,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-/* INTELLIGENCE DASHBOARD API */
-
 // Cache external threat data for 10 minutes.
 let threatCache = {
   data: null,
@@ -815,11 +982,11 @@ let threatCache = {
 
 const THREAT_CACHE_TTL = 10 * 60 * 1000;
 
+// Admin intelligence dashboard.
 app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
   try {
     const now = Date.now();
 
-    // Load actual reports from the existing MongoDB collection.
     const [
       totalReports,
       statusCounts,
@@ -841,7 +1008,9 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
       OtherCrime.aggregate([
         {
           $group: {
-            _id: { $ifNull: ["$category", "Other cybercrime"] },
+            _id: {
+              $ifNull: ["$category", "Other cybercrime"],
+            },
             count: { $sum: 1 },
           },
         },
@@ -870,7 +1039,12 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
             count: { $sum: 1 },
           },
         },
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
+        {
+          $sort: {
+            "_id.year": 1,
+            "_id.month": 1,
+          },
+        },
       ]),
 
       OtherCrime.find()
@@ -887,7 +1061,7 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
     let threatData = threatCache.data;
     let threatFeedStatus = "cached";
 
-    // URLhaus community feed. Never expose provider credentials to React.
+    // URLhaus feed. Provider credentials stay on the backend.
     if (!threatData || now - threatCache.fetchedAt > THREAT_CACHE_TTL) {
       try {
         const controller = new AbortController();
@@ -902,7 +1076,9 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
               headers: {
                 Accept: "application/json",
                 ...(process.env.URLHAUS_AUTH_KEY
-                  ? { "Auth-Key": process.env.URLHAUS_AUTH_KEY }
+                  ? {
+                      "Auth-Key": process.env.URLHAUS_AUTH_KEY,
+                    }
                   : {}),
               },
             },
@@ -940,7 +1116,6 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
       } catch (feedError) {
         console.error("URLhaus feed unavailable:", feedError.message);
 
-        // Keep the last successful snapshot if one exists.
         threatData = threatCache.data || [];
         threatFeedStatus = threatData.length ? "cached" : "unavailable";
       }
@@ -982,10 +1157,14 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
       reports: {
         total: totalReports,
         submitted: statusMap.Submitted || 0,
-        underReview: statusMap["Under Review"] || 0,
+        underReview:
+          statusMap["Under review"] || statusMap["Under Review"] || 0,
         inProgress: statusMap["In Progress"] || 0,
         resolved: statusMap.Resolved || 0,
         closed: statusMap.Closed || 0,
+        verified: statusMap.Verified || 0,
+        rejected: statusMap.Rejected || 0,
+        guidanceProvided: statusMap["Guidance provided"] || 0,
       },
 
       categories: categoryCounts.map((item) => ({
@@ -1015,8 +1194,9 @@ app.get("/api/intelligence", authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-/* PUBLIC URLHAUS THREAT AWARENESS API
-   Add after the existing /api/intelligence route. */
+// ============================================================
+// PUBLIC URLHAUS THREAT AWARENESS API
+// ============================================================
 
 app.get("/api/public/threat-awareness", async (req, res) => {
   let items = threatCache.data;
@@ -1024,6 +1204,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
 
   try {
     const now = Date.now();
+
     const cacheExpired =
       !items || now - threatCache.fetchedAt > THREAT_CACHE_TTL;
 
@@ -1074,6 +1255,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
             ? item.tags.filter((tag) => typeof tag === "string")
             : [],
         }));
+
         threatCache = {
           data: items,
           fetchedAt: Date.now(),
@@ -1087,8 +1269,8 @@ app.get("/api/public/threat-awareness", async (req, res) => {
 
     items = Array.isArray(items) ? items : [];
 
-    // These statistics describe only the displayed feed,
-    // not all cybercrime or all URLs worldwide.
+    // These figures describe the returned feed, not all
+    // cybercrime incidents worldwide.
     const todayUTC = new Date().toISOString().slice(0, 10);
 
     const stats = {
@@ -1104,6 +1286,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
 
       addedToday: items.filter((item) => {
         const dateAdded = item.dateAdded || item.date_added || "";
+
         return (
           typeof dateAdded === "string" && dateAdded.slice(0, 10) === todayUTC
         );
@@ -1119,7 +1302,9 @@ app.get("/api/public/threat-awareness", async (req, res) => {
         ? new Date(threatCache.fetchedAt).toISOString()
         : null,
       stats,
-      items: items.map((item) => ({
+
+      // Keep this feed limited to 30 displayed results.
+      items: items.slice(0, 30).map((item) => ({
         id: item.id,
         url: item.url || item.host || "",
         host: item.host || "",
@@ -1141,7 +1326,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
       error.message,
     );
 
-    // If an older successful cache exists, serve it.
+    // Serve the previous successful cache if available.
     items = Array.isArray(threatCache.data) ? threatCache.data : [];
 
     if (items.length === 0) {
@@ -1158,6 +1343,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
       fetchedAt: threatCache.fetchedAt
         ? new Date(threatCache.fetchedAt).toISOString()
         : null,
+
       stats: {
         returned: items.length,
 
@@ -1171,6 +1357,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
 
         addedToday: items.filter((item) => {
           const dateAdded = item.dateAdded || item.date_added || "";
+
           return (
             typeof dateAdded === "string" &&
             dateAdded.slice(0, 10) === new Date().toISOString().slice(0, 10)
@@ -1178,7 +1365,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
         }).length,
       },
 
-      items: items.map((item) => ({
+      items: items.slice(0, 30).map((item) => ({
         id: item.id,
         url: item.url || "",
         host: item.host,
@@ -1194,7 +1381,10 @@ app.get("/api/public/threat-awareness", async (req, res) => {
   }
 });
 
-// Connect to MongoDB and start the API.
+// ============================================================
+// CONNECT TO MONGODB AND START THE API
+// ============================================================
+
 mongoose
   .connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 10000,

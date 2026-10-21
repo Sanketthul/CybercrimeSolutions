@@ -43,6 +43,16 @@ export const Navbar = () => {
         </li>
         <li
           onClick={() => {
+            setMenu("My reports");
+          }}
+        >
+          <Link style={{ textDecoration: "none" }} to="/my-reports">
+            My reports
+          </Link>
+          {menu === "My reports" ? <hr /> : <></>}
+        </li>
+        <li
+          onClick={() => {
             setMenu("Feedback");
           }}
         >

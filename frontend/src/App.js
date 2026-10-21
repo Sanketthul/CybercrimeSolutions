@@ -18,6 +18,7 @@ import Login from "./pages/login_components";
 import Signup from "./pages/signup_components";
 import { Othercrime } from "./pages/Othercrime";
 import ThreatAwareness from "./pages/ThreatAwareness";
+import MyReports from "./pages/MyReports";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/Aboutus" element={<Aboutus />} />
           <Route path="/Awareness" element={<ThreatAwareness />} />
+          <Route path="/my-reports" element={<MyReports />} />
           <Route path="/Othercrime" element={<Othercrime />} />
           <Route path="/Feedback" element={<Feedback />} />
           <Route path="/Contactus" element={<Contantus />} />
