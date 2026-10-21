@@ -12,32 +12,20 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  // Each browser tab has its own sessionStorage.
-  const token = window.sessionStorage.getItem("token");
+api.interceptors.request.use(
+  (config) => {
+    const token = window.sessionStorage.getItem("token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    delete config.headers.Authorization;
-  }
-
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (
-      error.response?.status === 401 &&
-      window.sessionStorage.getItem("token")
-    ) {
-      window.sessionStorage.removeItem("token");
-      window.sessionStorage.removeItem("loggedIn");
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    } else if (config.headers) {
+      delete config.headers.Authorization;
     }
 
-    return Promise.reject(error);
+    return config;
   },
+  (error) => Promise.reject(error),
 );
 
 export default api;

@@ -147,8 +147,8 @@ export default function AdminHome({ userData }) {
   };
 
   const logOut = () => {
-    window.localStorage.removeItem("token");
-    window.localStorage.removeItem("loggedIn");
+    window.sessionStorage.removeItem("token");
+    window.sessionStorage.removeItem("loggedIn");
     navigate("/sign-in", { replace: true });
   };
 
