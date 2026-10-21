@@ -44,7 +44,8 @@ export default function MyReports() {
   const [copiedId, setCopiedId] = useState("");
 
   const loadReports = useCallback(async () => {
-    if (!window.localStorage.getItem("token")) {
+    // Use the same storage as Login and api.js.
+    if (!window.sessionStorage.getItem("token")) {
       setError("Please sign in to view reports linked to your account.");
       setLoading(false);
       return;
@@ -92,6 +93,7 @@ export default function MyReports() {
 
   const filteredReports = reports.filter((report) => {
     if (filter === "All") return true;
+
     return (
       (report.status || "Submitted").toLowerCase() === filter.toLowerCase()
     );
@@ -109,7 +111,8 @@ export default function MyReports() {
     ),
   ).length;
 
-  if (!window.localStorage.getItem("token")) {
+  // Use sessionStorage here too, so page rendering matches the login session.
+  if (!window.sessionStorage.getItem("token")) {
     return (
       <main className="my-reports-page">
         <section className="my-reports-hero">
@@ -127,7 +130,7 @@ export default function MyReports() {
             Sign in to see reports associated with your account, their tracking
             IDs and status updates.
           </p>
-          <Link className="my-reports-primary-button" to="/login">
+          <Link className="my-reports-primary-button" to="/sign-in">
             Sign in securely
           </Link>
         </section>
@@ -186,9 +189,10 @@ export default function MyReports() {
       {error && (
         <div className="my-reports-error" role="alert">
           <span>{error}</span>
-          {error.includes("sign in") ||
-          error.includes("session has expired") ? (
-            <Link to="/login">Sign in</Link>
+
+          {error.toLowerCase().includes("sign in") ||
+          error.toLowerCase().includes("session has expired") ? (
+            <Link to="/sign-in">Sign in</Link>
           ) : (
             <button type="button" onClick={loadReports}>
               Try again
@@ -251,6 +255,7 @@ export default function MyReports() {
                 ? "Try choosing another status to see your reports."
                 : "When you submit a report while signed in, it will appear here so you can find its tracking ID later."}
             </p>
+
             {reports.length === 0 && (
               <Link className="my-reports-primary-button" to="/Othercrime">
                 Submit your first report
@@ -290,6 +295,7 @@ export default function MyReports() {
                       <span className="my-report-field-label">TRACKING ID</span>
                       <strong>{trackingId}</strong>
                     </div>
+
                     {report.trackingId && (
                       <button
                         type="button"
@@ -329,7 +335,9 @@ export default function MyReports() {
                   >
                     {expandedReport === reportKey
                       ? "Hide status history"
-                      : `View status history${history.length ? ` (${history.length})` : ""}`}
+                      : `View status history${
+                          history.length ? ` (${history.length})` : ""
+                        }`}
                     <span>{expandedReport === reportKey ? "−" : "+"}</span>
                   </button>
 
@@ -348,8 +356,10 @@ export default function MyReports() {
                                   entry.newStatus ||
                                   "Status updated"}
                               </strong>
+
                               {entry.note && <p>{entry.note}</p>}
                               {entry.message && <p>{entry.message}</p>}
+
                               <span>
                                 {formatDate(
                                   entry.updatedAt ||
