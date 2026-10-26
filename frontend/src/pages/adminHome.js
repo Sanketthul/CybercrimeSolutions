@@ -220,10 +220,6 @@ export default function AdminHome({ userData }) {
           </div>
 
           <div className="topbar-actions">
-            <span className="system-status">
-              <i /> API workspace
-            </span>
-
             <button className="refresh-button" onClick={loadDashboard}>
               ↻ Refresh
             </button>

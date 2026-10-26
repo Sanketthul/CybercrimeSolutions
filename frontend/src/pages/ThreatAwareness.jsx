@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../api";
 import "./CSS/threatAwareness.css";
+import { Footer } from "../Components/Footer/Footer";
 
 const FEED_LIMIT = 30;
 const BOOKMARK_STORAGE_KEY = "scam-awareness-bookmarks";
+const QUIZ_STORAGE_KEY = "cybercrime-safety-quiz-progress";
 
 const SCAM_ARTICLES = [
   {
@@ -155,6 +157,129 @@ const CATEGORIES = [
   ...new Set(SCAM_ARTICLES.map((article) => article.category)),
 ];
 
+const QUIZ_QUESTIONS = [
+  {
+    id: "bank-phishing",
+    category: "Phishing",
+    icon: "🏦",
+    title: "The bank account warning",
+    sender: "Unknown sender · SMS",
+    message:
+      "URGENT: Your bank account will be blocked today! Verify your account immediately using the link below and enter your login details to prevent suspension.",
+    clues: [
+      "The message creates urgency and threatens account suspension.",
+      "It asks you to follow an unsolicited link.",
+      "It requests sensitive login information.",
+    ],
+    question: "What is the safest thing to do?",
+    options: [
+      "Open the link before the account is blocked.",
+      "Reply with your account details to verify your identity.",
+      "Ignore the link and check your account through the official banking app.",
+      "Forward the message to friends to see if it is genuine.",
+    ],
+    correctIndex: 2,
+    explanation:
+      "Scammers use fear and urgency to make people act without checking. Never use an unsolicited link to access your bank account. Open the official banking app or independently verified website instead.",
+  },
+  {
+    id: "fake-job",
+    category: "Job Scam",
+    icon: "💼",
+    title: "The easy-money job offer",
+    sender: "Unknown recruiter · Messaging app",
+    message:
+      "Congratulations! Earn ₹8,000 every day by liking videos. Pay a refundable ₹2,000 registration deposit to unlock your first task. Limited slots available!",
+    clues: [
+      "An upfront payment is required to start earning.",
+      "The promised income sounds unusually high for simple tasks.",
+      "The recruiter pressures you to act quickly.",
+    ],
+    question: "Which is the strongest warning sign?",
+    options: [
+      "The recruiter uses a messaging app.",
+      "You must pay a deposit to unlock work or earnings.",
+      "The job involves watching videos.",
+      "The recruiter uses the word congratulations.",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Task scams may initially show fake earnings or even make a small payment to build trust. They later demand deposits or fees. Never pay money to unlock supposed earnings, and independently verify the employer.",
+  },
+  {
+    id: "upi-request",
+    category: "UPI Fraud",
+    icon: "💳",
+    title: "The refund payment request",
+    sender: "Unknown buyer · Payment app",
+    message:
+      "Your refund is ready! Approve this UPI collect request and enter your UPI PIN to receive ₹4,500. Complete it within 2 minutes.",
+    clues: [
+      "The request asks you to authorize a payment to receive a refund.",
+      "It asks for a UPI PIN.",
+      "It uses a short deadline to rush the decision.",
+    ],
+    question: "What should you do?",
+    options: [
+      "Enter your UPI PIN because the payment is a refund.",
+      "Approve the request and check the balance afterward.",
+      "Reject the unexpected request and verify the refund independently.",
+      "Share your UPI PIN with the sender so they can help.",
+    ],
+    correctIndex: 2,
+    explanation:
+      "A UPI PIN authorizes a payment; it is not needed to receive money. Reject unexpected collect requests and verify refunds through the official app or service.",
+  },
+  {
+    id: "digital-arrest",
+    category: "Impersonation",
+    icon: "📹",
+    title: "The threatening video call",
+    sender: "Unknown caller · Video call",
+    message:
+      "We are calling from a government investigation department. Your identity is linked to a criminal case. Stay on this video call, do not tell anyone, and transfer money for verification.",
+    clues: [
+      "The caller threatens criminal consequences.",
+      "The caller tells you to keep the conversation secret.",
+      "The caller demands money for supposed verification.",
+    ],
+    question: "What is the safest response?",
+    options: [
+      "Transfer the money to prove your innocence.",
+      "Stay on the call and follow every instruction.",
+      "End the call and independently contact the relevant official agency.",
+      "Share your banking OTP to establish your identity.",
+    ],
+    correctIndex: 2,
+    explanation:
+      "Scammers impersonate officials to create fear and isolate victims. Do not transfer money or disclose OTPs. End the call, tell someone you trust, and verify claims through independently obtained official contact details.",
+  },
+  {
+    id: "account-takeover",
+    category: "Account Security",
+    icon: "🔐",
+    title: "The unexpected OTP",
+    sender: "Unknown caller · Phone call",
+    message:
+      "I am from customer support. We accidentally sent you an OTP. Read it out to me so I can cancel the transaction and secure your account.",
+    clues: [
+      "The caller asks you to disclose an OTP.",
+      "The caller claims sharing the code will protect your account.",
+      "The request is unsolicited and cannot be independently verified.",
+    ],
+    question: "What should you do?",
+    options: [
+      "Read the OTP because the caller says it is for security.",
+      "Share only the first few digits.",
+      "Do not share the OTP; end the call and contact the service through official channels.",
+      "Send a screenshot of the OTP message.",
+    ],
+    correctIndex: 2,
+    explanation:
+      "OTPs can authorize logins, transactions, or account changes. Do not disclose an authentication code to an unsolicited caller. Secure your account through its official app or verified support channel.",
+  },
+];
+
 function readBookmarks() {
   try {
     const saved = localStorage.getItem(BOOKMARK_STORAGE_KEY);
@@ -162,6 +287,31 @@ function readBookmarks() {
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
+  }
+}
+
+function readQuizProgress() {
+  const emptyProgress = {
+    attempts: 0,
+    bestScore: 0,
+    totalPercentage: 0,
+    badges: [],
+  };
+
+  try {
+    const saved = localStorage.getItem(QUIZ_STORAGE_KEY);
+    if (!saved) return emptyProgress;
+
+    const parsed = JSON.parse(saved);
+
+    return {
+      attempts: Number(parsed.attempts) || 0,
+      bestScore: Number(parsed.bestScore) || 0,
+      totalPercentage: Number(parsed.totalPercentage) || 0,
+      badges: Array.isArray(parsed.badges) ? parsed.badges : [],
+    };
+  } catch {
+    return emptyProgress;
   }
 }
 
@@ -339,6 +489,77 @@ export default function ThreatAwareness() {
   const [expandedArticle, setExpandedArticle] = useState(null);
   const [bookmarks, setBookmarks] = useState(readBookmarks);
   const [shareMessage, setShareMessage] = useState("");
+
+  const [quizProgress, setQuizProgress] = useState(readQuizProgress);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [quizChoice, setQuizChoice] = useState(null);
+  const [quizAnswered, setQuizAnswered] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizFinished, setQuizFinished] = useState(false);
+
+  const currentQuestion = QUIZ_QUESTIONS[quizIndex];
+
+  const quizPercentage = Math.round((quizScore / QUIZ_QUESTIONS.length) * 100);
+
+  const startQuiz = () => {
+    setQuizIndex(0);
+    setQuizChoice(null);
+    setQuizAnswered(false);
+    setQuizScore(0);
+    setQuizFinished(false);
+  };
+
+  const submitQuizAnswer = () => {
+    if (quizChoice === null || quizAnswered) return;
+
+    setQuizAnswered(true);
+
+    if (quizChoice === currentQuestion.correctIndex) {
+      setQuizScore((score) => score + 1);
+    }
+  };
+
+  const nextQuizQuestion = () => {
+    if (!quizAnswered) return;
+
+    if (quizIndex < QUIZ_QUESTIONS.length - 1) {
+      setQuizIndex((index) => index + 1);
+      setQuizChoice(null);
+      setQuizAnswered(false);
+      return;
+    }
+
+    const finalScore = quizScore;
+
+    const finalPercentage = Math.round(
+      (finalScore / QUIZ_QUESTIONS.length) * 100,
+    );
+
+    const nextProgress = {
+      attempts: quizProgress.attempts + 1,
+      bestScore: Math.max(quizProgress.bestScore, finalPercentage),
+      totalPercentage: quizProgress.totalPercentage + finalPercentage,
+      badges: [],
+    };
+
+    nextProgress.badges = [
+      ...(nextProgress.attempts >= 1 ? ["First Attempt"] : []),
+      ...(nextProgress.bestScore >= 60 ? ["Scam Spotter"] : []),
+      ...(nextProgress.bestScore >= 80 ? ["Cyber Guardian"] : []),
+      ...(nextProgress.bestScore === 100 ? ["Perfect Score"] : []),
+    ];
+
+    setQuizProgress(nextProgress);
+
+    try {
+      localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(nextProgress));
+    } catch (error) {
+      console.warn("Could not save quiz progress:", error);
+    }
+
+    setQuizScore(finalScore);
+    setQuizFinished(true);
+  };
 
   const [threats, setThreats] = useState([]);
   const [feedMetadata, setFeedMetadata] = useState({
@@ -900,6 +1121,272 @@ export default function ThreatAwareness() {
               </a>
             </div>
           </section>
+
+          {/* Scam Simulator and Safety Quiz */}
+          <section
+            className="scam-quiz-section"
+            aria-labelledby="scam-quiz-heading"
+          >
+            <div className="scam-quiz-heading">
+              <div>
+                <span className="scam-section-kicker">TEST YOUR INSTINCTS</span>
+                <h2 id="scam-quiz-heading">Scam Simulator &amp; Safety Quiz</h2>
+                <p>
+                  Can you spot a scam before it catches you? Analyse fictional
+                  messages, identify warning signs, and learn the safest
+                  response.
+                </p>
+              </div>
+
+              <div className="scam-quiz-score-pill">
+                <span aria-hidden="true">🏆</span>
+                Best: {quizProgress.bestScore}%
+              </div>
+            </div>
+
+            <div className="scam-quiz-stats">
+              <div className="scam-quiz-stat">
+                <span>Completed attempts</span>
+                <strong>{quizProgress.attempts}</strong>
+              </div>
+
+              <div className="scam-quiz-stat">
+                <span>Best safety score</span>
+                <strong>{quizProgress.bestScore}%</strong>
+              </div>
+
+              <div className="scam-quiz-stat">
+                <span>Average score</span>
+                <strong>
+                  {quizProgress.attempts
+                    ? Math.round(
+                        quizProgress.totalPercentage / quizProgress.attempts,
+                      )
+                    : 0}
+                  %
+                </strong>
+              </div>
+            </div>
+
+            {quizProgress.badges.length > 0 && (
+              <div className="scam-quiz-badges">
+                <strong>Your badges</strong>
+                <div className="scam-quiz-badge-list">
+                  {quizProgress.badges.map((badge) => (
+                    <span className="scam-quiz-badge" key={badge}>
+                      🏅 {badge}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {quizFinished ? (
+              <div className="scam-quiz-result" role="status">
+                <div className="scam-quiz-result-icon">
+                  {quizPercentage === 100
+                    ? "🏆"
+                    : quizPercentage >= 60
+                      ? "🛡️"
+                      : "📚"}
+                </div>
+
+                <span className="scam-quiz-kicker">QUIZ COMPLETED</span>
+
+                <h3>
+                  {quizPercentage === 100
+                    ? "Excellent! Perfect score."
+                    : quizPercentage >= 80
+                      ? "Great work, scam spotter!"
+                      : quizPercentage >= 60
+                        ? "Good effort. Keep practising!"
+                        : "Keep learning and try again!"}
+                </h3>
+
+                <div className="scam-quiz-final-score">{quizPercentage}%</div>
+
+                <p>
+                  You answered {quizScore} out of {QUIZ_QUESTIONS.length}{" "}
+                  questions correctly. Review the explanations as you practise
+                  to build stronger scam-detection habits.
+                </p>
+
+                <button
+                  type="button"
+                  className="scam-quiz-primary-btn"
+                  onClick={startQuiz}
+                >
+                  ↻ Try again
+                </button>
+              </div>
+            ) : (
+              <div className="scam-quiz-card">
+                <div className="scam-quiz-progress-top">
+                  <span>
+                    Scenario {quizIndex + 1} of {QUIZ_QUESTIONS.length}
+                  </span>
+                  <span>{quizScore} correct so far</span>
+                </div>
+
+                <div
+                  className="scam-quiz-progress-track"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={QUIZ_QUESTIONS.length}
+                  aria-valuenow={quizIndex + 1}
+                  aria-label="Quiz progress"
+                >
+                  <div
+                    className="scam-quiz-progress-fill"
+                    style={{
+                      width: `${
+                        ((quizIndex + 1) / QUIZ_QUESTIONS.length) * 100
+                      }%`,
+                    }}
+                  />
+                </div>
+                <div className="scam-quiz-workspace">
+                  <div className="scam-simulator-message">
+                    <div className="scam-simulator-top">
+                      <span className="scam-simulator-icon" aria-hidden="true">
+                        {currentQuestion.icon}
+                      </span>
+
+                      <div>
+                        <span className="scam-simulator-label">
+                          FICTIONAL SCAM SCENARIO
+                        </span>
+                        <strong>{currentQuestion.title}</strong>
+                        <small>{currentQuestion.sender}</small>
+                      </div>
+                    </div>
+
+                    <div className="scam-simulator-message-body">
+                      {currentQuestion.message}
+                    </div>
+
+                    <div className="scam-simulator-disclaimer">
+                      <span aria-hidden="true">ⓘ</span>
+                      Training example only. Do not click links or contact
+                      anyone mentioned in suspicious messages.
+                    </div>
+                  </div>
+
+                  <div className="scam-quiz-question">
+                    <span className="scam-quiz-kicker">MAKE YOUR DECISION</span>
+                    <h3>{currentQuestion.question}</h3>
+
+                    <div
+                      className="scam-quiz-options"
+                      role="group"
+                      aria-label="Answer choices"
+                    >
+                      {currentQuestion.options.map((option, index) => {
+                        const isCorrect =
+                          index === currentQuestion.correctIndex;
+                        const isSelected = quizChoice === index;
+                        let optionClass = "";
+
+                        if (quizAnswered && isCorrect) {
+                          optionClass = "correct";
+                        } else if (quizAnswered && isSelected && !isCorrect) {
+                          optionClass = "incorrect";
+                        } else if (isSelected) {
+                          optionClass = "selected";
+                        }
+
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            className={`scam-quiz-option ${optionClass}`}
+                            onClick={() => {
+                              if (!quizAnswered) setQuizChoice(index);
+                            }}
+                            disabled={quizAnswered}
+                            aria-pressed={isSelected}
+                          >
+                            <span className="scam-quiz-option-letter">
+                              {String.fromCharCode(65 + index)}
+                            </span>
+
+                            <span className="scam-quiz-option-text">
+                              {option}
+                            </span>
+
+                            {quizAnswered && isCorrect && (
+                              <span aria-label="Correct answer">✓</span>
+                            )}
+
+                            {quizAnswered && isSelected && !isCorrect && (
+                              <span aria-label="Incorrect answer">✕</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {quizAnswered && (
+                  <div
+                    className={`scam-quiz-explanation ${
+                      quizChoice === currentQuestion.correctIndex
+                        ? "success"
+                        : "warning"
+                    }`}
+                    role="status"
+                  >
+                    <strong>
+                      {quizChoice === currentQuestion.correctIndex
+                        ? "✓ Correct answer!"
+                        : "✕ Not quite — here's why"}
+                    </strong>
+
+                    <p>{currentQuestion.explanation}</p>
+
+                    <div className="scam-quiz-clues">
+                      <strong>Warning signs in this scenario</strong>
+                      <ul>
+                        {currentQuestion.clues.map((clue) => (
+                          <li key={clue}>{clue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                <div className="scam-quiz-controls">
+                  <span>
+                    {quizAnswered
+                      ? "Review the explanation before continuing."
+                      : "Choose the safest response to continue."}
+                  </span>
+
+                  {!quizAnswered ? (
+                    <button
+                      type="button"
+                      className="scam-quiz-primary-btn"
+                      onClick={submitQuizAnswer}
+                      disabled={quizChoice === null}
+                    >
+                      Check answer →
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="scam-quiz-primary-btn"
+                      onClick={nextQuizQuestion}
+                    >
+                      {quizIndex === QUIZ_QUESTIONS.length - 1
+                        ? "Finish quiz"
+                        : "Next scenario →"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
         </section>
       )}
 
@@ -1317,6 +1804,7 @@ export default function ThreatAwareness() {
           </section>
         </section>
       )}
+      <Footer />
     </main>
   );
 }

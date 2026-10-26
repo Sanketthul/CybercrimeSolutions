@@ -1,98 +1,327 @@
 #Res {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  padding: 100px 7% 110px;
   overflow: hidden;
-  background-color: #d9feff;
-  width: 98.8vw;
-  height: 110vh;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse at 0% 15%, rgba(89, 41, 65, 0.32), transparent 45%),
+    radial-gradient(
+      ellipse at 100% 90%,
+      rgba(223, 41, 53, 0.09),
+      transparent 38%
+    ),
+    #0b0b0e;
+  color: #f1f2eb;
+}
+
+/* Decorative background glow */
+#Res::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 12%;
+  right: -130px;
+  width: 320px;
+  height: 320px;
+  border: 1px solid rgba(247, 23, 53, 0.09);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 35px rgba(247, 23, 53, 0.018),
+    0 0 0 75px rgba(247, 23, 53, 0.012);
+  pointer-events: none;
+}
+
+/* Small section label */
+#Res .RES1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: #f71735;
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: 3px;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+#Res .RES1::before {
+  content: "";
+  width: 30px;
+  height: 2px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: #f71735;
+  box-shadow: 0 0 12px rgba(247, 23, 53, 0.4);
+}
+
+/* Introductory paragraph */
+#Res .RP {
+  display: block;
+  max-width: 850px;
+  margin-bottom: 52px;
+  color: rgba(241, 242, 235, 0.7);
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 0.1px;
+}
+
+/* Awareness cards layout */
+#Res .RPBars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 24px;
+  width: 100%;
+}
+
+/* Individual card */
+#Res .RRBar {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin: 0rem auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(241, 242, 235, 0.1);
+  border-radius: 18px;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.055),
+    rgba(255, 255, 255, 0.018) 65%
+  );
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
-.RES1 {
-  color: #5ce1e6;
-  font-size: 3rem;
-  font-weight: 600;
-  padding-top: 3rem;
-  margin-bottom: 2rem;
+
+/* Thin red accent along the top */
+#Res .RRBar::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #df2935, #f71735, #592941);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
 }
-.RES1 {
-  display: inline-block;
-  text-decoration: none;
-  border: 2px solid #5ce1e6;
-  padding: 12px 34px;
-  background-color: rgb(255, 255, 255);
-  border-radius: 0.5rem;
-  position: relative;
-  cursor: auto;
+
+#Res .RRBar:hover {
+  transform: translateY(-8px);
+  border-color: rgba(223, 41, 53, 0.55);
+  box-shadow:
+    0 22px 45px rgba(0, 0, 0, 0.32),
+    0 0 25px rgba(223, 41, 53, 0.07);
 }
-.RP {
-  font-weight: 700;
-  font-size: 16px;
-  max-width: 75rem;
-  padding: 0 2rem;
-  font-family: poppins;
+
+#Res .RRBar:hover::before {
+  transform: scaleX(1);
 }
-.RPBars {
-  margin: 1.5rem;
-  width: 100vw;
-  max-width: 80%;
-  text-align: left;
-}
-.RRBar {
-  display: flex;
-  margin: 1rem;
-  padding: 1.5rem 2rem;
-  border-radius: 0.5rem;
-  background: rgb(255, 255, 255);
-}
-.RPBarImg {
+
+/* Card image */
+#Res .RPBarImg {
+  display: block;
+  width: 100%;
+  height: 225px;
+  flex-shrink: 0;
   object-fit: cover;
-  height: 4rem;
-  width: 4rem;
-  margin-right: 2rem;
+  object-position: center;
+  background: #151519;
+  border: none;
+  outline: none;
+  filter: brightness(0.86) saturate(0.88);
+  transition:
+    transform 0.55s ease,
+    filter 0.35s ease;
 }
-.BarText h2 {
-  color: black;
+
+#Res .RRBar:hover .RPBarImg {
+  transform: scale(1.045);
+  filter: brightness(1) saturate(1);
 }
-.BarText p {
-  color: black;
-  font-size: 16px;
-  font-weight: 500;
-  font-family: poppins;
+
+/* Text area */
+#Res .BarText {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  padding: 26px 24px 28px;
+  box-sizing: border-box;
 }
-.RRBar:hover {
-  box-shadow: 0 0 20px 0px rgba(104, 247, 255, 0.823);
-  transition: 1s;
+
+/* Make the whole text area clickable */
+#Res .BarText a {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
 }
-@media (max-width: 780px) {
+
+/* Card heading */
+#Res .BarText h2 {
+  position: relative;
+  margin: 0 0 16px;
+  padding-bottom: 15px;
+  color: #f1f2eb;
+  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.35px;
+  transition: color 0.3s ease;
+}
+
+#Res .RRBar:hover .BarText h2 {
+  color: #f71735;
+}
+
+/* Short heading underline */
+#Res .BarText h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 34px;
+  height: 2px;
+  border-radius: 3px;
+  background: #df2935;
+  transition:
+    width 0.3s ease,
+    background 0.3s ease;
+}
+
+#Res .RRBar:hover .BarText h2::after {
+  width: 60px;
+  background: #f71735;
+}
+
+/* Card description */
+#Res .BarText p {
+  margin: 0;
+  color: rgba(241, 242, 235, 0.68);
+  font-size: 0.94rem;
+  font-weight: 400;
+  line-height: 1.85;
+}
+
+/* Keyboard accessibility */
+#Res .BarText a:focus-visible {
+  outline: 2px solid #f71735;
+  outline-offset: 5px;
+  border-radius: 5px;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 1024px) {
   #Res {
-    height: 160vh;
+    padding: 80px 5% 90px;
+  }
+
+  #Res .RPBars {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  #Res .RRBar:last-child {
+    grid-column: 1 / -1;
+  }
+
+  #Res .RRBar:last-child .RPBarImg {
+    height: 260px;
+  }
+
+  #Res .RPBarImg {
+    height: 205px;
+  }
+
+  #Res .BarText {
+    padding: 23px 22px 26px;
   }
 }
-@media (max-width: 470px) {
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 600px) {
   #Res {
-    height: 130vh;
+    padding: 62px 20px 70px;
   }
-  .RES1 {
-    width: 25%;
-    font-size: 20px;
-    padding-left: 1.2rem;
+
+  #Res .RES1 {
+    gap: 10px;
+    margin-bottom: 18px;
+    font-size: 0.74rem;
+    letter-spacing: 2.4px;
   }
-  .RP {
-    font-size: 9px;
-    font-weight: 200;
-    font-family: poppins;
+
+  #Res .RES1::before {
+    width: 24px;
   }
-  .RPBarImg {
-    width: 2rem;
-    height: 2rem;
+
+  #Res .RP {
+    margin-bottom: 32px;
+    font-size: 0.94rem;
+    line-height: 1.8;
   }
-  .BarText h2 {
-    font-size: 12px;
+
+  #Res .RPBars {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
   }
-  .BarText p {
-    font-size: 9px;
+
+  #Res .RRBar:last-child {
+    grid-column: auto;
+  }
+
+  #Res .RPBarImg,
+  #Res .RRBar:last-child .RPBarImg {
+    height: 215px;
+  }
+
+  #Res .BarText {
+    padding: 23px 21px 25px;
+  }
+
+  #Res .BarText h2 {
+    margin-bottom: 13px;
+    font-size: 1.25rem;
+  }
+
+  #Res .BarText p {
+    font-size: 0.92rem;
+    line-height: 1.8;
+  }
+}
+
+/* Reduced-motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  #Res .RRBar,
+  #Res .RRBar::before,
+  #Res .RPBarImg,
+  #Res .BarText h2,
+  #Res .BarText h2::after {
+    transition: none;
+  }
+
+  #Res .RRBar:hover {
+    transform: none;
+  }
+
+  #Res .RRBar:hover .RPBarImg {
+    transform: none;
   }
 }

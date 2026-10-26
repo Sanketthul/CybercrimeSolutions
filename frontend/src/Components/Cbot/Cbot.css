@@ -1,423 +1,766 @@
-/* Floating chatbot widget */
 .cyberbot-widget {
-  font-family: Poppins, "DM Sans", Arial, sans-serif;
+  --cb-bg: #0b0b0e;
+  --cb-panel: #151519;
+  --cb-panel-light: #1d1d23;
+  --cb-red: #df2935;
+  --cb-red-bright: #f71735;
+  --cb-green: #498467;
+  --cb-plum: #592941;
+  --cb-ivory: #f1f2eb;
+  --cb-muted: #a6a6b1;
+  --cb-border: rgba(241, 242, 235, 0.1);
+
+  font-family: inherit;
 }
 
-/* Small floating launcher */
-.cyberbot-widget .gemini-chat-launcher {
-  all: unset;
-  box-sizing: border-box;
+/* =========================================
+   FLOATING CHAT LAUNCHER
+   ========================================= */
+
+.gemini-chat-launcher {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 2147483000;
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  border: 2px solid #fff;
+  right: 26px;
+  bottom: 26px;
+  z-index: 9998;
+
+  width: 62px;
+  height: 62px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  color: #fff;
-  background: linear-gradient(135deg, #1769d2, #273b9c);
-  box-shadow: 0 8px 28px rgba(19, 61, 143, 0.38);
+
+  color: var(--cb-ivory, #f1f2eb);
+  background: linear-gradient(135deg, #f71735, #b91435);
+
+  box-shadow:
+    0 8px 28px rgba(247, 23, 53, 0.3),
+    0 0 0 5px rgba(223, 41, 53, 0.08);
+
   cursor: pointer;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
-.cyberbot-widget .gemini-chat-launcher:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(19, 61, 143, 0.45);
+.gemini-chat-launcher:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow:
+    0 12px 34px rgba(247, 23, 53, 0.4),
+    0 0 0 7px rgba(223, 41, 53, 0.1);
 }
 
-.cyberbot-widget .gemini-chat-launcher:focus-visible,
-.cyberbot-widget button:focus-visible {
-  outline: 3px solid #75d7ff;
-  outline-offset: 3px;
+.gemini-chat-launcher:active {
+  transform: scale(0.96);
 }
 
-.cyberbot-widget .gemini-chat-launcher svg {
-  display: block;
-  width: 27px;
-  height: 27px;
+.gemini-chat-launcher svg {
+  width: 29px;
+  height: 29px;
 }
 
-/* Chat window is rendered only after the launcher is clicked */
-.cyberbot-widget .gemini-chat-panel {
-  all: initial;
-  box-sizing: border-box;
+.gemini-chat-launcher.is-open {
+  background: linear-gradient(135deg, #592941, #30202c);
+}
+
+/* =========================================
+   CHAT PANEL
+   ========================================= */
+
+.gemini-chat-panel {
   position: fixed;
-  right: 24px;
-  bottom: 96px;
-  z-index: 2147482999;
+  right: 26px;
+  bottom: 104px;
+  z-index: 9999;
+
+  width: 390px;
+  height: min(620px, calc(100dvh - 145px));
+  min-height: 360px;
+  max-height: 700px;
+
   display: flex;
   flex-direction: column;
-  width: min(380px, calc(100vw - 32px));
-  height: min(560px, calc(100dvh - 120px));
-  min-height: 320px;
+
   overflow: hidden;
-  border: 1px solid #dce5f1;
-  border-radius: 18px;
-  color: #17253d;
-  background: #fff;
-  box-shadow: 0 18px 60px rgba(15, 35, 70, 0.28);
-  font-family: Poppins, "DM Sans", Arial, sans-serif;
-  animation: cyberbot-panel-in 0.18s ease-out;
-}
 
-.cyberbot-widget .gemini-chat-header {
-  box-sizing: border-box;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 9px;
-  padding: 13px;
-  color: #fff;
-  background: linear-gradient(120deg, #10284d, #2355a1);
-}
+  color: var(--cb-ivory, #f1f2eb);
+  background: var(--cb-bg, #0b0b0e);
 
-.cyberbot-widget .gemini-chat-logo {
-  display: grid;
-  flex: 0 0 38px;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.12);
-}
+  border: 1px solid rgba(223, 41, 53, 0.35);
+  border-radius: 20px;
 
-.cyberbot-widget .gemini-chat-logo svg {
-  width: 22px;
-  height: 22px;
-}
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.55),
+    0 0 35px rgba(223, 41, 53, 0.08);
 
-.cyberbot-widget .gemini-chat-title {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.cyberbot-widget .gemini-chat-title strong {
-  color: #fff;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.cyberbot-widget .gemini-chat-title span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #d8e7ff;
-  font-size: 10px;
-}
-
-.cyberbot-widget .gemini-chat-title span i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #72e8b1;
-}
-
-.cyberbot-widget .gemini-icon-button {
-  all: unset;
-  box-sizing: border-box;
-  display: grid;
-  flex: 0 0 30px;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 8px;
-  color: #fff;
-  background: transparent;
-  font-family: Arial, sans-serif;
-  font-size: 21px;
-  line-height: 1;
-  text-align: center;
-  cursor: pointer;
-}
-
-.cyberbot-widget .gemini-icon-button:hover {
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.cyberbot-widget .gemini-chat-messages {
-  box-sizing: border-box;
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
-  padding: 16px 12px;
-  background: #f7f9fd;
-  scroll-behavior: smooth;
-}
-
-.cyberbot-widget .gemini-message {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: 96%;
-  animation: cyberbot-message-in 0.18s ease-out;
-}
-
-.cyberbot-widget .gemini-message-user {
-  align-self: flex-end;
-  justify-content: flex-end;
-}
-
-.cyberbot-widget .gemini-message-bot {
-  align-self: flex-start;
-}
-
-.cyberbot-widget .gemini-message-avatar {
-  display: grid;
-  flex: 0 0 27px;
-  width: 27px;
-  height: 27px;
-  place-items: center;
-  border-radius: 9px;
-  color: #fff;
-  background: #2457a6;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.cyberbot-widget .gemini-message-bubble {
-  min-width: 0;
-  padding: 10px 11px;
-  border: 1px solid #e0e8f4;
-  border-radius: 5px 13px 13px;
-  background: #fff;
-  box-shadow: 0 3px 10px rgba(25, 50, 85, 0.035);
-}
-
-.cyberbot-widget .gemini-message-user .gemini-message-bubble {
-  border-color: #2457a6;
-  border-radius: 13px 5px 13px 13px;
-  color: #fff;
-  background: #2457a6;
-}
-
-.cyberbot-widget .gemini-message-bubble p {
-  margin: 0;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-  font-size: 12px;
-  line-height: 1.65;
-}
-
-.cyberbot-widget .gemini-typing {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 35px;
-}
-
-.cyberbot-widget .gemini-typing i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #6285ba;
-  animation: cyberbot-dot 0.9s infinite ease-in-out;
-}
-
-.cyberbot-widget .gemini-typing i:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.cyberbot-widget .gemini-typing i:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.cyberbot-widget .gemini-quick-questions {
-  box-sizing: border-box;
-  display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
-  padding: 0 13px 10px;
-  background: #f7f9fd;
-}
-
-.cyberbot-widget .gemini-quick-questions > span {
-  color: #71819a;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-}
-
-.cyberbot-widget .gemini-quick-questions button {
-  box-sizing: border-box;
-  max-width: 100%;
-  padding: 7px 9px;
-  border: 1px solid #d9e4f3;
-  border-radius: 9px;
-  color: #244c85;
-  background: #fff;
-  font: inherit;
-  font-size: 10px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.cyberbot-widget .gemini-quick-questions button:hover:not(:disabled) {
-  background: #e8f0ff;
-}
-
-.cyberbot-widget button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.cyberbot-widget .gemini-chat-error {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 8px 13px;
-  color: #a52a2a;
-  background: #fff3f2;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.cyberbot-widget .gemini-chat-composer {
-  box-sizing: border-box;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-  margin: 9px 11px 0;
-  padding: 6px 6px 6px 11px;
-  border: 1px solid #dce5f1;
-  border-radius: 12px;
-  background: #fff;
-}
-
-.cyberbot-widget .gemini-chat-composer:focus-within {
-  border-color: #4b78c1;
-  box-shadow: 0 0 0 3px rgba(55, 104, 183, 0.1);
-}
-
-.cyberbot-widget .gemini-chat-composer input {
-  box-sizing: border-box;
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-  padding: 7px 0;
-  border: 0;
-  outline: none;
-  color: #17253d;
-  background: transparent;
-  font: inherit;
-  font-size: 11px;
-}
-
-.cyberbot-widget .gemini-chat-composer input::placeholder {
-  color: #96a2b5;
-}
-
-.cyberbot-widget .gemini-chat-composer button {
-  all: unset;
-  box-sizing: border-box;
-  display: grid;
-  flex: 0 0 36px;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 9px;
-  color: #fff;
-  background: #2457a6;
-  cursor: pointer;
-}
-
-.cyberbot-widget .gemini-chat-composer button:disabled {
-  background: #a8b7cd;
-  cursor: not-allowed;
-}
-
-.cyberbot-widget .gemini-chat-composer button svg {
-  width: 17px;
-  height: 17px;
-}
-
-.cyberbot-widget .gemini-chat-disclaimer {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 8px 12px 10px;
-  color: #8190a4;
-  font-size: 9px;
-  line-height: 1.5;
-  text-align: center;
+  animation: cyberbot-panel-in 0.25s ease-out;
 }
 
 @keyframes cyberbot-panel-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(12px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
 
-@keyframes cyberbot-message-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* =========================================
+   CHAT HEADER
+   ========================================= */
+
+.gemini-chat-header {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  flex-shrink: 0;
+  padding: 17px 14px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(223, 41, 53, 0.17),
+      transparent 65%
+    ),
+    #151519;
+
+  border-bottom: 1px solid var(--cb-border, rgba(241, 242, 235, 0.1));
 }
 
-@keyframes cyberbot-dot {
+.gemini-chat-logo {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+  background: linear-gradient(135deg, #df2935, #592941);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 13px;
+
+  box-shadow: 0 4px 15px rgba(223, 41, 53, 0.18);
+}
+
+.gemini-chat-logo svg {
+  width: 24px;
+  height: 24px;
+}
+
+.gemini-chat-title {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gemini-chat-title strong {
+  overflow: hidden;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.1px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.gemini-chat-title span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #b9b9c3;
+  font-size: 11px;
+}
+
+.gemini-chat-title span i {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+
+  background: var(--cb-green, #498467);
+  border-radius: 50%;
+
+  box-shadow: 0 0 8px rgba(73, 132, 103, 0.55);
+}
+
+.gemini-icon-button {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #c6c6cf;
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+
+  font-size: 23px;
+  line-height: 1;
+
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.gemini-icon-button:hover {
+  color: #fff;
+  background: rgba(223, 41, 53, 0.17);
+  border-color: rgba(223, 41, 53, 0.4);
+}
+
+/* =========================================
+   MESSAGE AREA
+   ========================================= */
+
+.gemini-chat-messages {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  padding: 20px 15px 17px;
+
+  background:
+    radial-gradient(
+      ellipse at top right,
+      rgba(89, 41, 65, 0.12),
+      transparent 55%
+    ),
+    #0b0b0e;
+
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+.gemini-chat-messages::-webkit-scrollbar {
+  width: 5px;
+}
+
+.gemini-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gemini-chat-messages::-webkit-scrollbar-thumb {
+  background: #423039;
+  border-radius: 10px;
+}
+
+.gemini-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--cb-red, #df2935);
+}
+
+/* =========================================
+   MESSAGE ROWS
+   ========================================= */
+
+.gemini-message {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.gemini-message-bot {
+  justify-content: flex-start;
+}
+
+.gemini-message-user {
+  justify-content: flex-end;
+}
+
+/* Assistant avatar */
+
+.gemini-message-avatar {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+  background: linear-gradient(135deg, #df2935, #592941);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* Message bubbles */
+
+.gemini-message-bubble {
+  min-width: 0;
+  max-width: 84%;
+
+  padding: 12px 14px;
+
+  border-radius: 15px;
+
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.gemini-message-bubble p {
+  margin: 0;
+
+  color: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+
+  white-space: pre-wrap;
+}
+
+.gemini-message-bot .gemini-message-bubble {
+  color: #e8e8ed;
+
+  background: #1b1b21;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom-left-radius: 5px;
+}
+
+.gemini-message-user .gemini-message-bubble {
+  color: #fff;
+
+  background: linear-gradient(135deg, #c91e35, #8e203b);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom-right-radius: 5px;
+
+  box-shadow: 0 4px 14px rgba(223, 41, 53, 0.12);
+}
+
+/* =========================================
+   TYPING INDICATOR
+   ========================================= */
+
+.gemini-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  min-width: 62px;
+  min-height: 40px;
+}
+
+.gemini-typing i {
+  display: block;
+
+  width: 6px;
+  height: 6px;
+
+  background: #d6a6b6;
+  border-radius: 50%;
+
+  animation: cyberbot-typing 1.1s infinite ease-in-out;
+}
+
+.gemini-typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.gemini-typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes cyberbot-typing {
   0%,
   60%,
   100% {
-    opacity: 0.5;
+    opacity: 0.4;
     transform: translateY(0);
   }
+
   30% {
     opacity: 1;
-    transform: translateY(-4px);
+    transform: translateY(-5px);
   }
 }
 
-@media (max-width: 480px) {
-  .cyberbot-widget .gemini-chat-launcher {
-    right: 16px;
-    bottom: 16px;
-    width: 54px;
-    height: 54px;
+/* =========================================
+   QUICK QUESTIONS
+   ========================================= */
+
+.gemini-quick-questions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+
+  flex-shrink: 0;
+  padding: 0 15px 13px;
+
+  background: #0b0b0e;
+}
+
+.gemini-quick-questions > span {
+  margin-bottom: 1px;
+
+  color: #a5a5b0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.gemini-quick-questions button {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  color: #e7e7ec;
+  background: #17171d;
+
+  border: 1px solid rgba(223, 41, 53, 0.22);
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: left;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gemini-quick-questions button:hover:not(:disabled) {
+  background: rgba(223, 41, 53, 0.1);
+  border-color: rgba(247, 23, 53, 0.6);
+  transform: translateX(2px);
+}
+
+.gemini-quick-questions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   ERROR MESSAGE
+   ========================================= */
+
+.gemini-chat-error {
+  flex-shrink: 0;
+
+  margin: 0;
+  padding: 9px 14px;
+
+  color: #ffb8c0;
+  background: rgba(223, 41, 53, 0.1);
+
+  border-top: 1px solid rgba(223, 41, 53, 0.18);
+  border-bottom: 1px solid rgba(223, 41, 53, 0.18);
+
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   MESSAGE COMPOSER
+   ========================================= */
+
+.gemini-chat-composer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  flex-shrink: 0;
+  padding: 12px 13px;
+
+  background: #151519;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.gemini-chat-composer input {
+  flex: 1;
+  min-width: 0;
+  height: 43px;
+
+  padding: 0 13px;
+
+  color: #f1f2eb;
+  background: #0b0b0e;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  outline: none;
+
+  font-family: inherit;
+  font-size: 12px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.gemini-chat-composer input::placeholder {
+  color: #777782;
+}
+
+.gemini-chat-composer input:focus {
+  border-color: rgba(247, 23, 53, 0.7);
+  box-shadow: 0 0 0 3px rgba(247, 23, 53, 0.09);
+}
+
+.gemini-chat-composer input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.gemini-chat-composer button {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #fff;
+  background: linear-gradient(135deg, #f71735, #b91435);
+
+  border: none;
+  border-radius: 11px;
+
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.gemini-chat-composer button svg {
+  width: 19px;
+  height: 19px;
+}
+
+.gemini-chat-composer button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(247, 23, 53, 0.25);
+}
+
+.gemini-chat-composer button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.gemini-chat-composer button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   DISCLAIMER
+   ========================================= */
+
+.gemini-chat-disclaimer {
+  flex-shrink: 0;
+
+  margin: 0;
+  padding: 0 12px 12px;
+
+  color: #858590;
+  background: #151519;
+
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* =========================================
+   ACCESSIBILITY / KEYBOARD FOCUS
+   ========================================= */
+
+.gemini-chat-launcher:focus-visible,
+.gemini-icon-button:focus-visible,
+.gemini-quick-questions button:focus-visible,
+.gemini-chat-composer button:focus-visible {
+  outline: 2px solid #f1f2eb;
+  outline-offset: 3px;
+}
+
+.gemini-chat-panel button,
+.gemini-chat-panel input {
+  font-family: inherit;
+}
+
+/* =========================================
+   TABLET AND SMALLER SCREENS
+   ========================================= */
+
+@media (max-width: 600px) {
+  .gemini-chat-launcher {
+    right: 17px;
+    bottom: 17px;
+
+    width: 56px;
+    height: 56px;
   }
 
-  .cyberbot-widget .gemini-chat-panel {
-    right: 10px;
-    bottom: 80px;
-    width: calc(100vw - 20px);
-    height: min(570px, calc(100dvh - 96px));
-    min-height: 300px;
-    border-radius: 16px;
+  .gemini-chat-launcher svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .gemini-chat-panel {
+    right: 12px;
+    bottom: 84px;
+
+    width: min(390px, calc(100vw - 24px));
+    height: min(650px, calc(100dvh - 110px));
+    min-height: 320px;
+
+    border-radius: 17px;
+  }
+
+  .gemini-chat-header {
+    gap: 9px;
+    padding: 13px 11px;
+  }
+
+  .gemini-chat-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .gemini-chat-title strong {
+    font-size: 13px;
+  }
+
+  .gemini-chat-messages {
+    padding: 15px 11px;
+  }
+
+  .gemini-message-bubble {
+    max-width: 88%;
+    padding: 10px 12px;
+  }
+
+  .gemini-message-bubble p {
+    font-size: 12.5px;
+  }
+
+  .gemini-quick-questions {
+    padding: 0 11px 11px;
+  }
+
+  .gemini-chat-composer {
+    gap: 7px;
+    padding: 10px;
+  }
+
+  .gemini-chat-composer input {
+    height: 41px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .gemini-chat-composer button {
+    width: 41px;
+    height: 41px;
   }
 }
+
+/* =========================================
+   VERY SMALL SCREENS
+   ========================================= */
+
+@media (max-width: 360px) {
+  .gemini-chat-panel {
+    right: 8px;
+    bottom: 76px;
+    width: calc(100vw - 16px);
+  }
+
+  .gemini-chat-header {
+    gap: 7px;
+    padding: 11px 9px;
+  }
+
+  .gemini-chat-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .gemini-chat-title strong {
+    font-size: 11px;
+  }
+
+  .gemini-chat-title span {
+    font-size: 10px;
+  }
+
+  .gemini-icon-button {
+    width: 29px;
+    height: 29px;
+  }
+
+  .gemini-message-avatar {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* =========================================
+   REDUCED MOTION
+   ========================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  .cyberbot-widget .gemini-chat-panel,
-  .cyberbot-widget .gemini-message,
-  .cyberbot-widget .gemini-typing i {
+  .gemini-chat-panel,
+  .gemini-chat-launcher,
+  .gemini-icon-button,
+  .gemini-quick-questions button,
+  .gemini-chat-composer button,
+  .gemini-chat-composer input {
     animation: none;
+    transition: none;
+    scroll-behavior: auto;
   }
 
-  .cyberbot-widget .gemini-chat-messages {
-    scroll-behavior: auto;
+  .gemini-typing i {
+    animation: none;
+    opacity: 0.7;
   }
 }

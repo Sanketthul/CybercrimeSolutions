@@ -1,8 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import OthercrimeForm from "./OthercrimeForm";
 import OthercrimeList from "./OthercrimeList";
 import "./CSS/Othercrime.css";
+import { Footer } from "../Components/Footer/Footer";
 
 export const Othercrime = () => (
   <main className="cyber-report-page">
@@ -48,14 +48,8 @@ export const Othercrime = () => (
         </aside>
       </div>
     </div>
-    <footer className="report-footer">
-      <span>© {new Date().getFullYear()} Cybercrime Solutions</span>
-      <nav>
-        <Link to="/Disclaimer">Disclaimer</Link>
-        <Link to="/FAQ">FAQ</Link>
-        <Link to="/Website Policies">Website policies</Link>
-      </nav>
-    </footer>
+
+    <Footer />
   </main>
 );
 

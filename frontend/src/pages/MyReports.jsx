@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
 import "./CSS/myReports.css";
+import { Footer } from "../Components/Footer/Footer";
 
 function formatDate(value) {
   if (!value) return "Not available";
@@ -389,6 +390,7 @@ export default function MyReports() {
         <strong>Privacy reminder:</strong> Your reports are private account
         information. Sign out when using a shared device.
       </p>
+      <Footer />
     </main>
   );
 }
