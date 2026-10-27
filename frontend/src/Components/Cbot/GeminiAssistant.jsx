@@ -1,10 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+
 import "./GeminiAssistant.css";
 
 export const GeminiAssistant = ({ openChat }) => {
-  const navigate = useNavigate();
-
   return (
     <section className="gemini-assistant-section">
       <div className="gemini-assistant-card">
