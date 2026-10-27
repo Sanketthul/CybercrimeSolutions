@@ -4,8 +4,11 @@ import "./CSS/user.css";
 export default function UserHome({ userData }) {
   const navigate = useNavigate();
   const logOut = () => {
-    window.sessionStorage.removeItem("token");
-    window.sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("userType");
+
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/sign-in", { replace: true });
   };
   return (

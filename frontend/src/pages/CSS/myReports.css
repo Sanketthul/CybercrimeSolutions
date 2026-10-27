@@ -103,6 +103,7 @@
   line-height: 1.8;
 }
 
+/*buttons*/
 .my-reports-refresh-button,
 .my-reports-new-button,
 .my-reports-primary-button {
@@ -306,12 +307,10 @@
   background: linear-gradient(145deg, #262c28, #202522);
   transition:
     border-color 0.2s ease,
-    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .my-report-card:hover {
-  transform: translateY(-2px);
   border-color: rgba(73, 132, 103, 0.48);
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.13);
 }
@@ -530,6 +529,7 @@
   font-size: 0.88rem !important;
   font-weight: 750 !important;
   text-align: left;
+  cursor: pointer;
 }
 
 .my-report-history-toggle:hover {
@@ -549,73 +549,185 @@
   font-size: 1.1rem;
 }
 
-/*status history timeline*/
-.my-report-history {
-  display: grid;
-  gap: 0;
+/*status history section*/
+.my-report-history-section {
+  min-width: 0;
   margin-top: 18px;
-  padding: 20px;
+  padding: 16px;
+  overflow: hidden;
   border: 1px solid var(--mr-border);
   border-radius: 12px;
   background: rgba(15, 19, 17, 0.35);
 }
 
-.my-report-history-entry {
-  position: relative;
-  display: grid;
-  grid-template-columns: 13px minmax(0, 1fr);
-  gap: 13px;
-  padding-bottom: 23px;
+.my-report-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
 }
 
-.my-report-history-entry:last-child {
-  padding-bottom: 0;
+.my-report-history-heading > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.my-report-history-heading strong {
+  color: var(--mr-ivory);
+  font-size: 0.9rem;
+}
+
+.my-report-history-heading > div:first-child > span {
+  padding: 4px 8px;
+  border: 1px solid rgba(73, 132, 103, 0.3);
+  border-radius: 20px;
+  background: rgba(73, 132, 103, 0.13);
+  color: #a4d3b5;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/*history arrow controls*/
+.my-report-history-controls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.my-report-history-controls button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(73, 132, 103, 0.45);
+  border-radius: 9px;
+  background: #202522;
+  color: #a4d3b5;
+  font-size: 1.65rem !important;
+  line-height: 1;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.my-report-history-controls button:hover:not(:disabled) {
+  border-color: var(--mr-green);
+  background: var(--mr-green);
+  color: #fff;
+}
+
+.my-report-history-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+/*horizontal history timeline*/
+.my-report-history {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 5px 3px 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mr-green) #171a19;
+}
+
+.my-report-history-entry {
+  display: flex;
+  flex: 0 0 245px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid var(--mr-border);
+  border-radius: 11px;
+  background: linear-gradient(
+    145deg,
+    rgba(89, 41, 65, 0.25),
+    rgba(32, 37, 34, 0.95)
+  );
+  transition: border-color 0.2s ease;
+}
+
+.my-report-history-entry:hover {
+  border-color: rgba(73, 132, 103, 0.65);
 }
 
 .my-report-history-dot {
-  position: relative;
-  z-index: 1;
+  display: block;
+  flex: 0 0 11px;
   width: 11px;
   height: 11px;
-  margin-top: 5px;
-  border: 2px solid #a4d3b5;
+  margin: 0;
+  border: 2px solid #b7e0c5;
   border-radius: 50%;
   background: var(--mr-green);
   box-shadow: 0 0 0 4px rgba(73, 132, 103, 0.12);
 }
 
-.my-report-history-entry:not(:last-child)::before {
-  position: absolute;
-  top: 17px;
-  bottom: 0;
-  left: 5px;
-  width: 1px;
-  background: rgba(73, 132, 103, 0.5);
-  content: "";
-}
-
-.my-report-history-entry > div {
-  display: grid;
-  gap: 7px;
+.my-report-history-entry-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
   min-width: 0;
 }
 
-.my-report-history-entry strong {
+.my-report-history-entry-content strong {
   color: var(--mr-ivory);
   font-size: 0.9rem;
-}
-
-.my-report-history-entry p {
-  margin: 0;
-  color: #d0d7d1;
-  font-size: 0.86rem;
-  line-height: 1.7;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
-.my-report-history-entry > div > span {
+.my-report-history-entry-content p {
+  margin: 0;
+  color: #d0d7d1;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.my-report-history-entry-content .my-report-history-date {
+  margin-top: auto;
+  padding-top: 5px;
   color: #96a49a;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.my-report-history::-webkit-scrollbar {
+  height: 6px;
+}
+
+.my-report-history::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background: #171a19;
+}
+
+.my-report-history::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: var(--mr-green);
+}
+
+.my-report-history::-webkit-scrollbar-thumb:hover {
+  background: var(--mr-red);
 }
 
 .my-report-no-history {
@@ -867,8 +979,33 @@
     padding: 14px 13px;
   }
 
+  .my-report-history-section {
+    padding: 12px 10px;
+  }
+
+  .my-report-history-heading {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .my-report-history-heading > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .my-report-history-controls button {
+    width: 33px;
+    height: 33px;
+  }
+
   .my-report-history {
-    padding: 15px 12px;
+    gap: 10px;
+  }
+
+  .my-report-history-entry {
+    flex-basis: min(220px, 78vw);
+    padding: 14px;
   }
 
   .my-reports-error {
@@ -882,6 +1019,7 @@
   }
 }
 
+/*reduced motion accessibility*/
 @media (prefers-reduced-motion: reduce) {
   .my-reports-page *,
   .my-reports-page *::before,

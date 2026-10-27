@@ -14,8 +14,7 @@ const welcomeMessage = {
   text: "Hi! I'm your Cyber Safety Assistant. I can help with online fraud, phishing, hacked accounts, identity theft and reporting cybercrime in India.\n\nWhat would you like help with? Please don't share passwords, OTPs, PINs or banking details.",
 };
 
-export function Cbot() {
-  const [isOpen, setIsOpen] = useState(false);
+export function Cbot({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);

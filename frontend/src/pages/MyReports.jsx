@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
 import "./CSS/myReports.css";
@@ -44,8 +44,9 @@ export default function MyReports() {
   const [expandedReport, setExpandedReport] = useState(null);
   const [copiedId, setCopiedId] = useState("");
 
+  const historyRefs = useRef({});
+
   const loadReports = useCallback(async () => {
-    // Use the same storage as Login and api.js.
     if (!window.sessionStorage.getItem("token")) {
       setError("Please sign in to view reports linked to your account.");
       setLoading(false);
@@ -92,6 +93,17 @@ export default function MyReports() {
     }
   };
 
+  const scrollHistory = (reportKey, direction) => {
+    const container = historyRefs.current[reportKey];
+
+    if (!container) return;
+
+    container.scrollBy({
+      left: direction * Math.max(container.clientWidth * 0.75, 220),
+      behavior: "smooth",
+    });
+  };
+
   const filteredReports = reports.filter((report) => {
     if (filter === "All") return true;
 
@@ -112,7 +124,6 @@ export default function MyReports() {
     ),
   ).length;
 
-  // Use sessionStorage here too, so page rendering matches the login session.
   if (!window.sessionStorage.getItem("token")) {
     return (
       <main className="my-reports-page">
@@ -135,6 +146,7 @@ export default function MyReports() {
             Sign in securely
           </Link>
         </section>
+        <Footer />
       </main>
     );
   }
@@ -336,41 +348,78 @@ export default function MyReports() {
                   >
                     {expandedReport === reportKey
                       ? "Hide status history"
-                      : `View status history${
-                          history.length ? ` (${history.length})` : ""
-                        }`}
+                      : `View status history${history.length ? ` (${history.length})` : ""}`}
                     <span>{expandedReport === reportKey ? "−" : "+"}</span>
                   </button>
 
                   {expandedReport === reportKey && (
-                    <div className="my-report-history">
+                    <div className="my-report-history-section">
                       {history.length > 0 ? (
-                        history.map((entry, index) => (
-                          <div
-                            className="my-report-history-entry"
-                            key={entry._id || index}
-                          >
-                            <span className="my-report-history-dot" />
+                        <>
+                          <div className="my-report-history-heading">
                             <div>
-                              <strong>
-                                {entry.status ||
-                                  entry.newStatus ||
-                                  "Status updated"}
-                              </strong>
-
-                              {entry.note && <p>{entry.note}</p>}
-                              {entry.message && <p>{entry.message}</p>}
-
+                              <strong>Status timeline</strong>
                               <span>
-                                {formatDate(
-                                  entry.updatedAt ||
-                                    entry.createdAt ||
-                                    entry.date,
-                                )}
+                                {history.length}{" "}
+                                {history.length === 1 ? "update" : "updates"}
                               </span>
                             </div>
+
+                            <div className="my-report-history-controls">
+                              <button
+                                type="button"
+                                aria-label="Scroll status history left"
+                                onClick={() => scrollHistory(reportKey, -1)}
+                                disabled={history.length <= 1}
+                              >
+                                ‹
+                              </button>
+                              <button
+                                type="button"
+                                aria-label="Scroll status history right"
+                                onClick={() => scrollHistory(reportKey, 1)}
+                                disabled={history.length <= 1}
+                              >
+                                ›
+                              </button>
+                            </div>
                           </div>
-                        ))
+
+                          <div
+                            className="my-report-history"
+                            ref={(element) => {
+                              historyRefs.current[reportKey] = element;
+                            }}
+                          >
+                            {history.map((entry, index) => (
+                              <div
+                                className="my-report-history-entry"
+                                key={entry._id || index}
+                              >
+                                <span className="my-report-history-dot" />
+
+                                <div className="my-report-history-entry-content">
+                                  <strong>
+                                    {entry.status ||
+                                      entry.newStatus ||
+                                      "Status updated"}
+                                  </strong>
+
+                                  {entry.note && <p>{entry.note}</p>}
+                                  {entry.message && <p>{entry.message}</p>}
+
+                                  <span className="my-report-history-date">
+                                    {formatDate(
+                                      entry.updatedAt ||
+                                        entry.createdAt ||
+                                        entry.date,
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
                       ) : (
                         <p className="my-report-no-history">
                           No additional status history is available for this
@@ -390,6 +439,7 @@ export default function MyReports() {
         <strong>Privacy reminder:</strong> Your reports are private account
         information. Sign out when using a shared device.
       </p>
+
       <Footer />
     </main>
   );

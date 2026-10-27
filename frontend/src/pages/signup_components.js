@@ -406,7 +406,7 @@ export default function Signup() {
                 </span>
               </div>
 
-              <label htmlFor="signup-adminCode">Admin secret code</label>
+              <label htmlFor="signup-adminCode">Admin secret code: Admin</label>
               <div className="signup-input-wrap">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect

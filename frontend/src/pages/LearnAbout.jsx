@@ -1,127 +1,175 @@
 import React from "react";
 import "./CSS/LearnAbout.css";
-import facebook from "../Components/Assets/facebook-app-symbol.png";
-import instagram from "../Components/Assets/instagram.png";
-import Twitter from "../Components/Assets/twitter.png";
-import youtube from "../Components/Assets/youtube.png";
-import { Link } from "react-router-dom";
+import { Footer } from "../Components/Footer/Footer";
+
 export const LearnAbout = () => {
   const data = [
     {
-      fname:
-        "1. Phishing: Phishing involves tricking individuals into providing sensitive information such as usernames, passwords, credit card numbers, or other personal data by posing as a legitimate entity through emails, messages, or websites.",
+      title: "Phishing",
+      description:
+        "Phishing involves tricking individuals into providing sensitive information such as usernames, passwords, credit card numbers, or other personal data by posing as a legitimate entity through emails, messages, or websites.",
     },
     {
-      fname:
-        "2. Insider Threats: Insider threats occur when individuals with authorized access to an organization's systems or information misuse their privileges for malicious purposes, such as stealing data, sabotaging operations, or committing fraud.",
+      title: "Insider Threats",
+      description:
+        "Insider threats occur when individuals with authorized access to an organization's systems or information misuse their privileges for malicious purposes, such as stealing data, sabotaging operations, or committing fraud.",
     },
     {
-      fname:
-        "3. Social Engineering: Social engineering involves manipulating people into divulging confidential information or performing actions that compromise security, often through techniques such as pretexting, baiting, phishing, or impersonation.",
+      title: "Social Engineering",
+      description:
+        "Social engineering involves manipulating people into divulging confidential information or performing actions that compromise security, often through techniques such as pretexting, baiting, phishing, or impersonation.",
     },
     {
-      fname:
-        "4. Cyber Espionage: Cyber espionage, also known as cyber spying or cyber intelligence gathering, involves unauthorized access to sensitive information or intellectual property for espionage purposes, typically conducted by nation-states, intelligence agencies, or corporate competitors.",
+      title: "Cyber Espionage",
+      description:
+        "Cyber espionage, also known as cyber spying or cyber intelligence gathering, involves unauthorized access to sensitive information or intellectual property for espionage purposes, typically conducted by nation-states, intelligence agencies, or corporate competitors.",
     },
     {
-      fname:
-        "5. Eavesdropping/Sniffing: Eavesdropping or sniffing involves intercepting and monitoring network communications to capture sensitive information, such as passwords, financial details, or personal conversations, transmitted over unsecured or poorly encrypted connections.",
+      title: "Eavesdropping / Sniffing",
+      description:
+        "Eavesdropping or sniffing involves intercepting and monitoring network communications to capture sensitive information, such as passwords, financial details, or personal conversations, transmitted over unsecured or poorly encrypted connections.",
     },
     {
-      fname:
-        "6. Supply Chain Attacks: Supply chain attacks involve targeting the vulnerabilities in third-party vendors, suppliers, or partners to infiltrate the networks or systems of larger organizations, allowing attackers to gain unauthorized access or conduct espionage activities.",
+      title: "Supply Chain Attacks",
+      description:
+        "Supply chain attacks involve targeting vulnerabilities in third-party vendors, suppliers, or partners to infiltrate the networks or systems of larger organizations, allowing attackers to gain unauthorized access or conduct espionage activities.",
     },
     {
-      fname:
-        "7. Denial-of-Service (DoS) Attacks: DoS attacks disrupt the availability of online services by flooding servers, networks, or websites with excessive traffic, causing them to become slow, unresponsive, or entirely inaccessible to legitimate users.",
+      title: "Denial-of-Service (DoS) Attacks",
+      description:
+        "DoS attacks disrupt the availability of online services by flooding servers, networks, or websites with excessive traffic, causing them to become slow, unresponsive, or entirely inaccessible to legitimate users.",
     },
     {
-      fname:
-        "8. Man-in-the-Middle (MitM) Attacks: MitM attacks occur when a cybercriminal intercepts and potentially alters communication between two parties without their knowledge, allowing them to eavesdrop on sensitive information or manipulate data exchanges.",
+      title: "Man-in-the-Middle (MitM) Attacks",
+      description:
+        "MitM attacks occur when a cybercriminal intercepts and potentially alters communication between two parties without their knowledge, allowing them to eavesdrop on sensitive information or manipulate data exchanges.",
     },
     {
-      fname:
-        "9. SIM Swapping: SIM swapping, also known as SIM hijacking, involves fraudulently transferring a victim's phone number to a SIM card controlled by the attacker. This allows the attacker to receive the victim's calls, messages, and authentication codes, potentially gaining access to sensitive accounts.",
+      title: "SIM Swapping",
+      description:
+        "SIM swapping, also known as SIM hijacking, involves fraudulently transferring a victim's phone number to a SIM card controlled by the attacker. This allows the attacker to receive the victim's calls, messages, and authentication codes, potentially gaining access to sensitive accounts.",
     },
     {
-      fname:
-        "10. AI-Powered Cyber Attacks: With the advancement of artificial intelligence (AI) and machine learning (ML) technologies, cybercriminals can develop sophisticated attacks that leverage AI algorithms to automate tasks, evade detection, and adapt to security defenses.",
+      title: "AI-Powered Cyber Attacks",
+      description:
+        "With the advancement of artificial intelligence (AI) and machine learning (ML) technologies, cybercriminals can develop sophisticated attacks that leverage AI algorithms to automate tasks, evade detection, and adapt to security defenses.",
     },
   ];
+
   return (
-    <div className="heading">
-      <h2>Learn About Cybercrime</h2>
-      <p>
-        In general cybercrime may be defined as “Any unlawful act where computer
-        or communication device or computer network is used to commit or
-        facilitate the commission of crime”.
-      </p>
-      <p1>
-        Below is a list for some of the cybercrimes along with their indicative
-        explanation. This is to facitilate better reporting of complaints.
-      </p1>
-      <div className="table">
-        <table>
-          <thread>
-            <tr>
-              <th>
-                Cybercrime encompasses a wide range of illegal activities
-                carried out using digital means or involving computers and
-                networks. Here are some common types of cybercrimes:
-              </th>
-            </tr>
-          </thread>
-          <tbody>
-            {data.map((val, i) => (
-              <tr>
-                <td>{val.fname}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="footer">
-        <ul className="footer-links">
-          <Link style={{ textDecoration: "none" }} to="/Disclaimer">
-            <li>Disclaimer</li>
-          </Link>
-          <Link style={{ textDecoration: "none" }} to="/FAQ">
-            <li>FAQ</li>
-          </Link>
-          <Link style={{ textDecoration: "none" }} to="/Website Policies">
-            <li>Website Policies</li>
-          </Link>
-        </ul>
-        <div className="footer-social-icon">
-          <div className="footer-icons-container">
-            <a href="https://www.facebook.com/profile.php?id=61557782943831">
-              <img src={facebook} alt="" />
-            </a>
-          </div>
-          <div className="footer-icons-container">
-            <a href="https://www.instagram.com/cyber_crime_solutions/?hl=en">
-              <img src={instagram} alt="" />
-            </a>
-          </div>
-          <div className="footer-icons-container">
-            <a href="https://twitter.com/Cyberdost215403">
-              <img src={Twitter} alt="" />
-            </a>
-          </div>
-          <div className="footer-icons-container">
-            <a href="https://www.youtube.com/channel/UCJu2wA_pKFOJ6j10YW7q7oA">
-              <img src={youtube} alt="" />
-            </a>
-          </div>
+    <main className="learn-about-page">
+      {/* Hero */}
+      <section className="learn-about-hero">
+        <span className="learn-about-eyebrow">CYBER SAFETY KNOWLEDGE</span>
+
+        <h1>
+          Learn About <span>Cybercrime</span>
+        </h1>
+
+        <p className="learn-about-hero-description">
+          Understand common cyber threats, recognize suspicious activity, and
+          learn how digital crimes affect individuals and organizations.
+        </p>
+
+        <div className="learn-about-tags">
+          <span>Threat Awareness</span>
+          <span>Online Safety</span>
+          <span>Digital Protection</span>
         </div>
-        <div className="footer-copyright">
-          <hr />
+      </section>
+
+      {/* Main content */}
+      <section className="learn-about-content">
+        <div className="learn-about-intro">
+          <div className="learn-about-section-label">
+            <span className="learn-about-label-line" />
+            UNDERSTANDING CYBERCRIME
+          </div>
+
+          <h2>
+            Know the threats.
+            <span> Stay protected.</span>
+          </h2>
+
           <p>
-            Copyright @ 2025 - All Right Reserved Designed By Cyber Crime
-            Solutions.
+            In general, cybercrime may be defined as any unlawful act where a
+            computer, communication device, or computer network is used to
+            commit or facilitate the commission of a crime.
+          </p>
+
+          <p>
+            Below is a list of common cybercrimes with brief explanations.
+            Understanding these threats can help you recognize suspicious
+            activity and make informed decisions when reporting incidents.
           </p>
         </div>
-      </div>
-    </div>
+
+        {/* Cybercrime list */}
+        <div className="learn-about-list-heading">
+          <div>
+            <span>CYBER THREAT DIRECTORY</span>
+            <h2>Common Types of Cybercrime</h2>
+          </div>
+
+          <span className="learn-about-count">
+            {String(data.length).padStart(2, "0")} THREATS
+          </span>
+        </div>
+
+        <div className="learn-about-table-wrapper">
+          <table className="learn-about-table">
+            <thead>
+              <tr>
+                <th scope="col" className="learn-about-number-heading">
+                  No.
+                </th>
+                <th scope="col">Cybercrime</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={item.title}>
+                  <td className="learn-about-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </td>
+
+                  <td className="learn-about-crime-title">
+                    <span className="learn-about-row-marker" />
+                    {item.title}
+                  </td>
+
+                  <td className="learn-about-description">
+                    {item.description}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Safety reminder */}
+        <div className="learn-about-reminder">
+          <div className="learn-about-reminder-icon" aria-hidden="true">
+            !
+          </div>
+
+          <div>
+            <h3>Stay alert. Think before you click.</h3>
+            <p>
+              Never share passwords, PINs, or one-time passwords with anyone.
+              Verify suspicious links and requests before taking action, and use
+              official reporting channels if you suspect cybercrime.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <Footer />
+    </main>
   );
 };
+
+export default LearnAbout;

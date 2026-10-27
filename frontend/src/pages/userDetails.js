@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import UserHome from "./userHome";
 import AdminHome from "./adminHome";
+import "./CSS/userDetails.css";
 
 export default function UserDetails() {
   const [userData, setUserData] = useState(null);

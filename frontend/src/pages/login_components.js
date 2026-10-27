@@ -34,6 +34,13 @@ export default function Login() {
 
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("loggedIn", "true");
+      sessionStorage.removeItem("userType");
+
+      if (response.data?.user) {
+        sessionStorage.setItem("userData", JSON.stringify(response.data.user));
+      }
+
+      window.dispatchEvent(new Event("auth-change"));
 
       navigate("/userDetails", { replace: true });
     } catch (requestError) {

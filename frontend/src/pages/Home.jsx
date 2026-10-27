@@ -9,13 +9,12 @@ import { Footer } from "../Components/Footer/Footer";
 export const Home = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const openChat = () => setIsChatOpen(true);
-
   return (
     <div>
       <Hero />
       <Res />
-      <GeminiAssistant openChat={openChat} />
+      <GeminiAssistant openChat={() => setIsChatOpen(true)} />
+
       <Cbot isOpen={isChatOpen} setIsOpen={setIsChatOpen} />
       <Links />
       <Footer />

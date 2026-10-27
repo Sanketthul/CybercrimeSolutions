@@ -147,8 +147,11 @@ export default function AdminHome({ userData }) {
   };
 
   const logOut = () => {
-    window.sessionStorage.removeItem("token");
-    window.sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("userType");
+
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/sign-in", { replace: true });
   };
 

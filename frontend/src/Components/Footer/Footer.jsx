@@ -2,7 +2,7 @@ import React from "react";
 import "./Footer.css";
 import facebook from "../Assets/facebook-app-symbol.png";
 import instagram from "../Assets/instagram.png";
-import twitter from "../Assets/twitter.png";
+import twitter from "../Assets/x (1).png";
 import youtube from "../Assets/youtube.png";
 import { Link } from "react-router-dom";
 
@@ -12,22 +12,22 @@ export const Footer = () => {
   const socialLinks = [
     {
       name: "Facebook",
-      url: "https://www.facebook.com/profile.php?id=61557782943831",
+      url: "https://www.facebook.com",
       icon: facebook,
     },
     {
       name: "Instagram",
-      url: "https://www.instagram.com/cyber_crime_solutions/?hl=en",
+      url: "https://www.instagram.com",
       icon: instagram,
     },
     {
       name: "Twitter / X",
-      url: "https://twitter.com/Cyberdost215403",
+      url: "https://twitter.com",
       icon: twitter,
     },
     {
       name: "YouTube",
-      url: "https://www.youtube.com/channel/UCJu2wA_pKFOJ6j10YW7q7oA",
+      url: "https://www.youtube.com",
       icon: youtube,
     },
   ];
