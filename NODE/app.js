@@ -39,10 +39,31 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const MONGODB_URI = process.env.MONGODB_URI;
 const ADMIN_SIGNUP_CODE = process.env.ADMIN_SIGNUP_CODE;
 
-const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:3000")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = [
+  "https://cybercrime-solutionsf-one.vercel.app",
+  ...(process.env.CLIENT_ORIGIN || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+  "http://localhost:3000",
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests without an Origin header, such as server-to-server requests.
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.error("CORS blocked origin:", origin);
+    return callback(new Error("Origin not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 // In Vercel/serverless environments, do not terminate the process while
 // importing this file. Validate configuration when a request is received.
@@ -90,20 +111,6 @@ app.use((req, res, next) => {
   );
   next();
 });
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Origin is not allowed by CORS"));
-    },
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
 
 app.use(express.json({ limit: "100kb" }));
 
@@ -1380,7 +1387,7 @@ app.get("/api/public/threat-awareness", async (req, res) => {
 // ============================================================
 
 app.use((err, req, res, next) => {
-  if (err.message === "Origin is not allowed by CORS") {
+  if (err.message === "Origin not allowed by CORS") {
     return res.status(403).json({
       error: "This origin is not allowed.",
     });
