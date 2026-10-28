@@ -88,9 +88,14 @@ const otherCrimeSchema = new mongoose.Schema(
         ];
       },
     },
+    adminResponse: {
+      type: String,
+      default: "",
+      maxlength: 1000,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "UserInfo",
       default: null,
       index: true,
     },
