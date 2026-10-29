@@ -4248,3 +4248,18 @@
 .threat-awareness-page .threat-feed-item .threat-category * {
   color: inherit !important;
 }
+
+/* threat category tag - Other */
+.threat-awareness-page .threat-feed-item .threat-category-tag {
+  color: #c3e2cf !important;
+  background: rgba(73, 132, 103, 0.2) !important;
+  border: 1px solid rgba(73, 132, 103, 0.45) !important;
+  border-radius: 7px;
+}
+
+/* keep Other readable on card hover */
+.threat-awareness-page .threat-feed-item:hover .threat-category-tag {
+  color: #c3e2cf !important;
+  background: rgba(73, 132, 103, 0.2) !important;
+  border-color: rgba(73, 132, 103, 0.45) !important;
+}
