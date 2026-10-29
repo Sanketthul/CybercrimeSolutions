@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api";
 import "./CSS/Othercrime.css";
 
@@ -14,12 +14,117 @@ function OthercrimeForm({ onSubmitted }) {
   const [error, setError] = useState("");
   const [receipt, setReceipt] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadUserProfile = async () => {
+      const token = sessionStorage.getItem("token");
+      const loggedIn = sessionStorage.getItem("loggedIn");
+
+      if (!token || loggedIn !== "true") {
+        if (active) {
+          setProfileLoading(false);
+        }
+        return;
+      }
+
+      try {
+        // Use the same profile source as Navbar.jsx.
+        let userData = null;
+        const savedUser = sessionStorage.getItem("userData");
+
+        if (savedUser) {
+          try {
+            userData = JSON.parse(savedUser);
+          } catch {
+            userData = null;
+          }
+        }
+
+        // Refresh the profile so we use the latest name and email.
+        const response = await api.get("/userData");
+        const result = response.data?.data;
+
+        if (result) {
+          userData = result;
+          sessionStorage.setItem("userData", JSON.stringify(result));
+        }
+
+        if (!active) return;
+
+        if (userData) {
+          const fullName = [userData.fname, userData.lname]
+            .filter((part) => typeof part === "string" && part.trim())
+            .join(" ")
+            .trim();
+
+          const userName =
+            fullName ||
+            userData.name?.trim() ||
+            userData.username?.trim() ||
+            "";
+
+          setForm((previous) => ({
+            ...previous,
+            name: userName,
+            email: userData.email || "",
+          }));
+        }
+      } catch (requestError) {
+        console.error(
+          "Could not load report form profile:",
+          requestError.response?.status || requestError.message,
+        );
+
+        // Use cached profile data if the request fails.
+        if (active) {
+          const savedUser = sessionStorage.getItem("userData");
+
+          if (savedUser) {
+            try {
+              const userData = JSON.parse(savedUser);
+              const fullName = [userData.fname, userData.lname]
+                .filter((part) => typeof part === "string" && part.trim())
+                .join(" ")
+                .trim();
+
+              setForm((previous) => ({
+                ...previous,
+                name:
+                  fullName ||
+                  userData.name?.trim() ||
+                  userData.username?.trim() ||
+                  "",
+                email: userData.email || "",
+              }));
+            } catch {
+              // Leave the profile fields empty if cached data is invalid.
+            }
+          }
+        }
+      } finally {
+        if (active) {
+          setProfileLoading(false);
+        }
+      }
+    };
+
+    loadUserProfile();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const update = (event) => {
-    setForm({
-      ...form,
-      [event.target.name]: event.target.value,
-    });
+    const { name, value } = event.target;
+
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -34,12 +139,12 @@ function OthercrimeForm({ onSubmitted }) {
 
       setReceipt(response.data);
 
-      setForm({
-        name: "",
-        email: "",
+      // Keep the logged-in user's name and email after submission.
+      setForm((previous) => ({
+        ...previous,
         category: "Online fraud / UPI scam",
         message: "",
-      });
+      }));
 
       onSubmitted?.(response.data);
     } catch (requestError) {
@@ -103,9 +208,8 @@ function OthercrimeForm({ onSubmitted }) {
           </p>
 
           <p>
-            Save this tracking ID and use the same email address you entered
-            above to check status updates and administrative responses in the
-            tracking section.
+            Save this tracking ID and use the same email address to check status
+            updates and administrative responses in the tracking section.
           </p>
 
           <p>
@@ -121,12 +225,14 @@ function OthercrimeForm({ onSubmitted }) {
           Full name
           <input
             name="name"
-            value={form.name}
-            onChange={update}
+            value={
+              profileLoading && !form.name ? "Loading profile..." : form.name
+            }
+            readOnly
             autoComplete="name"
-            maxLength="100"
             required
-            placeholder="Your full name"
+            placeholder="Name unavailable"
+            aria-busy={profileLoading}
           />
         </label>
 
@@ -136,17 +242,29 @@ function OthercrimeForm({ onSubmitted }) {
             name="email"
             type="email"
             value={form.email}
-            onChange={update}
+            readOnly
             autoComplete="email"
-            maxLength="254"
             required
-            placeholder="you@example.com"
+            placeholder="Email unavailable"
+            aria-busy={profileLoading}
           />
         </label>
 
+        {!profileLoading && (!form.name || !form.email) && (
+          <div className="notice notice-error" role="alert">
+            Your profile details could not be fully loaded. Please sign in again
+            or refresh the page before submitting your report.
+          </div>
+        )}
+
         <label>
           Incident category
-          <select name="category" value={form.category} onChange={update}>
+          <select
+            name="category"
+            value={form.category}
+            onChange={update}
+            disabled={busy}
+          >
             <option>Online fraud / UPI scam</option>
             <option>Social media account compromise</option>
             <option>Identity theft / impersonation</option>
@@ -166,12 +284,19 @@ function OthercrimeForm({ onSubmitted }) {
             maxLength="5000"
             required
             rows="5"
-            placeholder="What happened, when it happened, and any relevant details…"
+            disabled={busy}
+            placeholder="What happened, when it happened, and any relevant details..."
           />
         </label>
 
-        <button className="primary-button" type="submit" disabled={busy}>
-          {busy ? "Submitting securely…" : "Submit report"}
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={
+            busy || profileLoading || !form.name.trim() || !form.email.trim()
+          }
+        >
+          {busy ? "Submitting securely..." : "Submit report"}
         </button>
       </form>
     </section>

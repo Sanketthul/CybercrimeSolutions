@@ -229,6 +229,7 @@
   display: flex;
   align-items: flex-start;
   gap: 11px;
+  min-width: 0;
   padding: 14px 16px;
   margin: 20px 0;
   border: 1px solid var(--report-border);
@@ -245,9 +246,79 @@
 }
 
 .notice-success {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+
+  width: 100%;
+  min-width: 0;
+  padding: 24px;
+  box-sizing: border-box;
+
   color: #c7ead4;
   background: rgba(73, 132, 103, 0.13);
   border-color: rgba(73, 132, 103, 0.45);
+  text-align: left;
+}
+
+.notice-success > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.notice-success p {
+  margin: 0;
+  line-height: 1.75;
+}
+
+.notice-success strong {
+  color: #a4d3b5;
+}
+
+.notice-success .receipt-tracking-id {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 4px 0;
+  padding: 16px;
+  box-sizing: border-box;
+
+  color: #b7e0c5;
+  background: #171c19;
+  border: 1px dashed rgba(104, 198, 149, 0.55);
+  border-radius: 12px;
+
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 1px;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.notice-success .secondary-button {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+}
+
+@media (max-width: 600px) {
+  .notice-success {
+    padding: 18px 14px;
+    gap: 12px;
+  }
+
+  .notice-success .receipt-tracking-id {
+    padding: 13px 10px;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
 }
 
 /*report form*/
@@ -896,4 +967,17 @@
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/*locked profile fields*/
+.profile-locked-input {
+  cursor: not-allowed;
+  opacity: 0.85;
+  background: #202522 !important;
+  border-color: rgba(73, 132, 103, 0.35) !important;
+}
+
+.profile-locked-input:focus {
+  outline: none;
+  box-shadow: none !important;
 }

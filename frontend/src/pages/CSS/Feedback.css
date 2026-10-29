@@ -821,3 +821,15 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+/*read-only profile fields*/
+.container2 input[readonly] {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/*profile loading and submission states*/
+.container2 button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

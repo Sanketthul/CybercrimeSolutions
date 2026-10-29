@@ -4090,3 +4090,161 @@
   margin: 48px auto 0;
   scroll-margin-top: 24px;
 }
+
+/* live feed cards */
+.threat-awareness-page .threat-feed-item {
+  color: #f1f2eb;
+  background: #202522;
+  border: 1px solid rgba(241, 242, 235, 0.12);
+  border-radius: 12px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.threat-awareness-page .threat-feed-item:hover {
+  color: #f1f2eb;
+  background: #272e29;
+  border-color: rgba(73, 132, 103, 0.65);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+/* live feed text */
+.threat-awareness-page .threat-feed-item strong,
+.threat-awareness-page .threat-feed-item span,
+.threat-awareness-page .threat-feed-item p {
+  color: #f1f2eb;
+}
+
+.threat-awareness-page .threat-feed-item .threat-feed-meta,
+.threat-awareness-page .threat-feed-item .threat-feed-explanation,
+.threat-awareness-page .threat-feed-item .threat-feed-limit-note {
+  color: #b9c1bc;
+}
+
+/* url and status tags */
+.threat-awareness-page .threat-feed-item .threat-status-badge,
+.threat-awareness-page .threat-feed-item .scam-severity-badge,
+.threat-awareness-page .threat-feed-item .scam-category-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 9px;
+  color: #c3e2cf;
+  background: rgba(73, 132, 103, 0.2);
+  border: 1px solid rgba(73, 132, 103, 0.35);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* prevent hover styles from whitening nested tags */
+.threat-awareness-page .threat-feed-item:hover .threat-status-badge,
+.threat-awareness-page .threat-feed-item:hover .scam-severity-badge,
+.threat-awareness-page .threat-feed-item:hover .scam-category-chip {
+  color: #c3e2cf;
+  background: rgba(73, 132, 103, 0.2);
+  border-color: rgba(73, 132, 103, 0.45);
+}
+
+/* long malicious URLs */
+.threat-awareness-page .threat-feed-url-info,
+.threat-awareness-page .threat-feed-url-info strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.threat-awareness-page .threat-feed-url-info strong {
+  color: #f1f2eb;
+}
+
+/* feed icon */
+.threat-awareness-page .threat-feed-url-icon {
+  flex-shrink: 0;
+  color: #ff9da5;
+  background: rgba(247, 23, 53, 0.12);
+  border: 1px solid rgba(247, 23, 53, 0.22);
+}
+
+/* live feed links */
+.threat-awareness-page .threat-feed-item a {
+  color: #a9dfbd;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.threat-awareness-page .threat-feed-item a:hover {
+  color: #f1f2eb;
+  text-decoration-color: #a9dfbd;
+}
+
+/* keep focus visible */
+.threat-awareness-page .threat-feed-item a:focus-visible,
+.threat-awareness-page .threat-feed-item button:focus-visible {
+  outline: 3px solid rgba(131, 198, 158, 0.65);
+  outline-offset: 3px;
+}
+
+/* javascript and technology tags */
+.threat-awareness-page .threat-feed-item .tag,
+.threat-awareness-page .threat-feed-item .tech-tag,
+.threat-awareness-page .threat-feed-item .technology-tag,
+.threat-awareness-page .threat-feed-item .threat-tag,
+.threat-awareness-page .threat-feed-item .scam-category-chip {
+  color: #c3e2cf !important;
+  background: rgba(73, 132, 103, 0.2) !important;
+  border: 1px solid rgba(73, 132, 103, 0.45);
+}
+
+/* keep tag text readable when hovering */
+.threat-awareness-page .threat-feed-item:hover .tag,
+.threat-awareness-page .threat-feed-item:hover .tech-tag,
+.threat-awareness-page .threat-feed-item:hover .technology-tag,
+.threat-awareness-page .threat-feed-item:hover .threat-tag,
+.threat-awareness-page .threat-feed-item:hover .scam-category-chip {
+  color: #c3e2cf !important;
+  background: rgba(73, 132, 103, 0.2) !important;
+}
+
+/* nested text inside tags */
+.threat-awareness-page .threat-feed-item .tag *,
+.threat-awareness-page .threat-feed-item .tech-tag *,
+.threat-awareness-page .threat-feed-item .technology-tag *,
+.threat-awareness-page .threat-feed-item .threat-tag *,
+.threat-awareness-page .threat-feed-item .scam-category-chip * {
+  color: inherit !important;
+}
+
+/* other category tag */
+.threat-awareness-page .threat-feed-item .other-tag,
+.threat-awareness-page .threat-feed-item .category-tag,
+.threat-awareness-page .threat-feed-item .scam-category,
+.threat-awareness-page .threat-feed-item .threat-category {
+  color: #c3e2cf !important;
+  background: rgba(73, 132, 103, 0.2) !important;
+  border: 1px solid rgba(73, 132, 103, 0.45) !important;
+}
+
+/* other tag hover */
+.threat-awareness-page .threat-feed-item:hover .other-tag,
+.threat-awareness-page .threat-feed-item:hover .category-tag,
+.threat-awareness-page .threat-feed-item:hover .scam-category,
+.threat-awareness-page .threat-feed-item:hover .threat-category {
+  color: #c3e2cf !important;
+  background: rgba(73, 132, 103, 0.2) !important;
+}
+
+/* text inside the other tag */
+.threat-awareness-page .threat-feed-item .other-tag *,
+.threat-awareness-page .threat-feed-item .category-tag *,
+.threat-awareness-page .threat-feed-item .scam-category *,
+.threat-awareness-page .threat-feed-item .threat-category * {
+  color: inherit !important;
+}
