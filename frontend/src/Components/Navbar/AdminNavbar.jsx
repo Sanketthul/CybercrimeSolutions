@@ -98,6 +98,7 @@ export default function AdminNavbar() {
     { label: "Dashboard", path: "/userDetails" },
     { label: "Awareness", path: "/Awareness" },
     { label: "About Us", path: "/Aboutus" },
+    { label: "Feedback", path: "/admin/feedback" },
   ];
 
   return (

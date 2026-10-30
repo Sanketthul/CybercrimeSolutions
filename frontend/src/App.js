@@ -14,6 +14,7 @@ import { Secure } from "./pages/Secure";
 import { Aboutus } from "./pages/Aboutus";
 import { Feedback } from "./pages/Feedback";
 import { Contantus } from "./pages/Contantus";
+import AdminFeedback from "./pages/AdminFeedback";
 import { Disclaimer } from "./Components/footerpoint/Disclaimer";
 import { FAQ } from "./Components/footerpoint/FAQ";
 import { WebsitePolicies } from "./Components/footerpoint/WebsitePolicies";
@@ -114,7 +115,7 @@ function AppLayout() {
         <Route path="/Othercrime" element={<Othercrime />} />
         <Route path="/Feedback" element={<Feedback />} />
         <Route path="/Contactus" element={<Contantus />} />
-
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
         <Route path="/Cybercrime" element={<Cybercrime />} />
         <Route path="/Cybercrime/:CybercrimeId" element={<Cybercrime />} />
 
